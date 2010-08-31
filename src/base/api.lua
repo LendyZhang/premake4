@@ -48,7 +48,7 @@
 			scope = "config",
 		},
 		
-		deployoptions =
+		deploymentoptions =
 		{
 			kind  = "list",
 			scope = "config",
@@ -115,6 +115,12 @@
 				"3.5",
 				"4.0"
 			}
+		},
+		
+		imagepath = 
+		{
+			kind = "path",
+			scope = "config",
 		},
 		
 		imageoptions =
@@ -521,7 +527,7 @@
 		local scope   = premake.fields[name].scope
 		local allowed = premake.fields[name].allowed
 		
-		if (kind == "string" or kind == "path" and value) then
+		if ((kind == "string" or kind == "path") and value) then
 			if type(value) ~= "string" then
 				error("string value expected", 3)
 			end
