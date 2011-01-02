@@ -361,11 +361,12 @@
 		includedirs { "include/pkg1", "include/pkg2" }
 		defines { "DEFINE1", "DEFINE2" }
 		prepare()
-		premake.vs200x_vcproj_VCCLCompilerTool_GCC(premake.getconfig(prj, "Debug", "PS3"))
+		premake.vs200x_vcproj_VCCLCompilerTool_PS3(premake.getconfig(prj, "Debug", "PS3"))
 		test.capture [[
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="-g"
+				UsePrecompiledHeader="0"
+				AdditionalOptions=""
 				AdditionalIncludeDirectories="include\pkg1;include\pkg2"
 				PreprocessorDefinitions="DEFINE1;DEFINE2"
 				ProgramDataBaseFileName="$(OutDir)\MyProject.pdb"
@@ -378,7 +379,7 @@
 	function suite.LinkerBlock_OnPS3ConsoleApp()
 		platforms { "PS3" }
 		prepare()
-		premake.vs200x_vcproj_VCLinkerTool_GCC(premake.getconfig(prj, "Debug", "PS3"))
+		premake.vs200x_vcproj_VCLinkerTool_PS3(premake.getconfig(prj, "Debug", "PS3"))
 		test.capture [[
 			<Tool
 				Name="VCLinkerTool"
@@ -398,7 +399,7 @@
 		platforms { "PS3" }
 		kind "StaticLib"
 		prepare()
-		premake.vs200x_vcproj_VCLinkerTool_GCC(premake.getconfig(prj, "Debug", "PS3"))
+		premake.vs200x_vcproj_VCLinkerTool_PS3(premake.getconfig(prj, "Debug", "PS3"))
 		test.capture [[
 			<Tool
 				Name="VCLibrarianTool"
@@ -415,7 +416,7 @@
 		language "C++"
 		kind "SharedLib"
 		prepare()
-		premake.vs200x_vcproj_VCLinkerTool_GCC(premake.getconfig(prj, "Debug", "PS3"))
+		premake.vs200x_vcproj_VCLinkerTool_PS3(premake.getconfig(prj, "Debug", "PS3"))
 
 		test.capture [[
 			<Tool
@@ -718,4 +719,13 @@
 				CompileAs="1"
 			/>
 		]]
+	end
+	
+	
+	function suite.noLinkIncrementalFlag_valueEqualsOne()
+		flags { "NoIncrementalLink" }
+		prepare()
+		premake.vs200x_vcproj_VCLinkerTool(premake.getconfig(prj, "Debug"))
+		local result = io.endcapture()		
+		test.string_contains(result,'LinkIncremental="1"')
 	end
