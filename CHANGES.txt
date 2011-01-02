@@ -1,4 +1,13 @@
 -------
+  4.4  (in progress)
+-------
+
+* Patch 2963313: Enable setting .NET framework version (Justen Hyde)
+* Switched PS3 builds from GCC to SNC
+* Ignore NoRTTI flag for Managed C++ projects (Nick Darnell)
+
+
+-------
  4.3.1 (in progress)
 -------
 
@@ -128,7 +137,6 @@
 - Bug 1900333: Parentheses in build path
 - Bug 2790865: SharedLib on OSX fixes (Ash Berlin)
 - Bug 2790882: Trailing slash in path.getabsolute (Ash Berlin)
-
 
 RC2 -> RC3
 

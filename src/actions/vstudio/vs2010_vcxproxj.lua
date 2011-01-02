@@ -149,8 +149,9 @@ local vs10_helpers = premake.vstudio.vs10_helpers
 			if cfg.flags.MFC then
 				_p(2,'<UseOfMfc>Dynamic</UseOfMfc>')
 			end
-				_p(2,'<UseDebugLibraries>%s</UseDebugLibraries>'
-						,iif(optimisation(cfg) == "Disabled","true","false"))				
+			
+			_p(2,'<UseDebugLibraries>%s</UseDebugLibraries>'
+				,iif(optimisation(cfg) == "Disabled","true","false"))				
 			_p(1,'</PropertyGroup>')
 		end
 	end
@@ -168,14 +169,10 @@ local vs10_helpers = premake.vstudio.vs10_helpers
 
 	local function incremental_link(cfg,cfginfo)
 		if cfg.kind ~= "StaticLib" then
-			ShoudLinkIncrementally = 'false'
-			if optimisation(cfg) == "Disabled" then
-				ShoudLinkIncrementally = 'true'
-			end
-
 			_p(2,'<LinkIncremental '..if_config_and_platform() ..'>%s</LinkIncremental>'
-					,premake.esc(cfginfo.name),ShoudLinkIncrementally)
-		end		
+					,premake.esc(cfginfo.name)
+					,tostring(premake.config.should_link_incrementally(cfg)))
+		end
 	end
 		
 		
@@ -267,7 +264,7 @@ local vs10_helpers = premake.vstudio.vs10_helpers
 	end
 	
 	local function rtti(cfg)
-		if cfg.flags.NoRTTI then
+		if cfg.flags.NoRTTI and not cfg.flags.Managed then
 			_p(3,'<RuntimeTypeInfo>false</RuntimeTypeInfo>')
 		end
 	end
@@ -305,8 +302,8 @@ local vs10_helpers = premake.vstudio.vs10_helpers
 	--
 		local debug_info = ''
 		if cfg.flags.Symbols then
-			if optimisation(cfg) ~= "Disabled" or cfg.flags.NoEditAndContinue then
-				debug_info = "ProgramDatabase"
+			if premake.config.isoptimizedbuild(cfg.flags) or cfg.flags.NoEditAndContinue then
+				debug_info = "ProgramDatabase" 
 			elseif cfg.platform ~= "x64" then
 				debug_info = "EditAndContinue"
 			else
@@ -345,7 +342,7 @@ local vs10_helpers = premake.vstudio.vs10_helpers
 			preprocessor(3,cfg)
 			minimal_build(cfg)
 		
-		if optimisation(cfg) == "Disabled" then
+		if  not premake.config.isoptimizedbuild(cfg.flags) then
 			_p(3,'<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>')
 			if cfg.flags.ExtraWarnings then
 				_p(3,'<SmallerTypeCheck>true</SmallerTypeCheck>')
@@ -451,7 +448,7 @@ local vs10_helpers = premake.vstudio.vs10_helpers
 			_p(3,'<GenerateDebugInformation>false</GenerateDebugInformation>')
 		end
 			
-		if optimisation(cfg) ~= "Disabled" then
+		if premake.config.isoptimizedbuild(cfg.flags) then
 			_p(3,'<OptimizeReferences>true</OptimizeReferences>')
 			_p(3,'<EnableCOMDATFolding>true</EnableCOMDATFolding>')
 		end
