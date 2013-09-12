@@ -267,11 +267,15 @@
 				_p('  LINKCMD    = $(AR) -rcs $(TARGET) $(OBJECTS)')
 			end
 		else
+
 			-- this was $(TARGET) $(LDFLAGS) $(OBJECTS)
-			--  but had trouble linking to certain static libs so $(OBJECTS) moved up
-			-- then $(LDFLAGS) moved to end
-			--   https://sourceforge.net/tracker/?func=detail&aid=3430158&group_id=71616&atid=531880
-			_p('  LINKCMD    = $(%s) -o $(TARGET) $(OBJECTS) $(RESOURCES) $(ARCH) $(LIBS) $(ALL_LDFLAGS)', iif(cfg.language == "C", "CC", "CXX"))
+			--   but had trouble linking to certain static libs; $(OBJECTS) moved up
+			-- $(LDFLAGS) moved to end (http://sourceforge.net/p/premake/patches/107/)
+			-- $(LIBS) moved to end (http://sourceforge.net/p/premake/bugs/279/)
+
+			local tool = iif(cfg.language == "C", "CC", "CXX")
+			_p('  LINKCMD    = $(%s) -o $(TARGET) $(OBJECTS) $(RESOURCES) $(ARCH) $(ALL_LDFLAGS) $(LIBS)', tool)
+
 		end
 	end
 
@@ -301,15 +305,19 @@
 
 		local pch = cfg.pchheader
 		for _, incdir in ipairs(cfg.includedirs) do
-			local testname = path.join(incdir, pch)
+
+			-- convert this back to an absolute path for os.isfile()
+			local abspath = path.getabsolute(path.join(cfg.project.location, incdir))
+
+			local testname = path.join(abspath, pch)
 			if os.isfile(testname) then
-				pch = testname
+				pch = path.getrelative(cfg.location, testname)
 				break
 			end
 		end
 
-		_p('  PCH        = %s', _MAKE.esc(path.getrelative(cfg.location, cfg.pchheader)))
-		_p('  GCH        = $(OBJDIR)/$(notdir $(PCH)).gch', _MAKE.esc(path.getname(cfg.pchheader)))
+		_p('  PCH        = %s', _MAKE.esc(pch))
+		_p('  GCH        = $(OBJDIR)/$(notdir $(PCH)).gch')
 
 	end
 
