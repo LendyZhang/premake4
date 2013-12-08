@@ -236,6 +236,30 @@
 	end
 
 
+--
+-- Print out a directory list in the Xcode format.
+--
+-- @param list
+--    The directory list to be printed.
+-- @param tag
+--    The Xcode specific list tag.
+--
+
+	function xcode.printdirlist(list, tag)
+		if #list > 0 then
+			_p(4,'%s = (', tag)
+			for _, item in ipairs(list) do
+				local escaped_item
+				escaped_item = item:gsub("\\", "\\\\")
+				escaped_item = escaped_item:gsub(" ", "\\\\ ")
+				escaped_item = escaped_item:gsub("\"", "\\\"")
+				_p(5, '"%s",', escaped_item)
+			end
+			_p(4,');')
+		end
+	end
+
+
 ---------------------------------------------------------------------------
 -- Section generator functions, in the same order in which they appear
 -- in the .pbxproj file
@@ -826,8 +850,8 @@
 		_p(4,'GCC_WARN_ABOUT_RETURN_TYPE = YES;')
 		_p(4,'GCC_WARN_UNUSED_VARIABLE = YES;')
 
-		xcode.printlist(cfg.includedirs, 'HEADER_SEARCH_PATHS')
-		xcode.printlist(cfg.libdirs, 'LIBRARY_SEARCH_PATHS')
+		xcode.printdirlist(cfg.includedirs, 'HEADER_SEARCH_PATHS')
+		xcode.printdirlist(cfg.libdirs, 'LIBRARY_SEARCH_PATHS')
 		
 		_p(4,'OBJROOT = "%s";', cfg.objectsdir)
 
