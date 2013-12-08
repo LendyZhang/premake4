@@ -12,11 +12,6 @@
 --
 
 	function codeblocks.files(prj)
-		local pchheader
-		if (prj.pchheader) then
-			pchheader = path.getrelative(prj.location, prj.pchheader)
-		end
-		
 		for fcfg in premake.project.eachfile(prj) do
 			_p(2,'<Unit filename="%s">', premake.esc(fcfg.name))
 			if fcfg.name ~= fcfg.vpath then
@@ -27,7 +22,7 @@
 			elseif path.iscfile(fcfg.name) and prj.language == "C++" then
 				_p(3,'<Option compilerVar="CC" />')
 			end
-			if not prj.flags.NoPCH and fcfg.name == pchheader then
+			if not prj.flags.NoPCH and fcfg.name == premake.locatepch(prj) then
 				_p(3,'<Option compilerVar="%s" />', iif(prj.language == "C", "CC", "CPP"))
 				_p(3,'<Option compile="1" />')
 				_p(3,'<Option weight="0" />')

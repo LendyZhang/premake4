@@ -812,7 +812,7 @@
 		
 		if cfg.pchheader and not cfg.flags.NoPCH then
 			_p(4,'GCC_PRECOMPILE_PREFIX_HEADER = YES;')
-			_p(4,'GCC_PREFIX_HEADER = "%s";', cfg.pchheader)
+			_p(4,'GCC_PREFIX_HEADER = "%s";', premake.locatepch(cfg))
 		end
 		
 		xcode.printlist(cfg.defines, 'GCC_PREPROCESSOR_DEFINITIONS')
