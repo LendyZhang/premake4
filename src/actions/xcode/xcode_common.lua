@@ -758,6 +758,11 @@
 			_p(4,'CONFIGURATION_BUILD_DIR = %s;', outdir)
 		end
 
+		_p(4,'FRAMEWORK_SEARCH_PATHS = (')
+		_p(5,'"$(inherited)",')
+		_p(5,'"$(LOCAL_LIBRARY_DIR)/Frameworks",')
+		_p(4,');')
+
 		_p(4,'GCC_DYNAMIC_NO_PIC = NO;')
 		_p(4,'GCC_MODEL_TUNING = G5;')
 
