@@ -758,10 +758,22 @@
 			_p(4,'CONFIGURATION_BUILD_DIR = %s;', outdir)
 		end
 
-		_p(4,'FRAMEWORK_SEARCH_PATHS = (')
-		_p(5,'"$(inherited)",')
-		_p(5,'"$(LOCAL_LIBRARY_DIR)/Frameworks",')
-		_p(4,');')
+		local frameworkpaths = { "$(inherited)" }
+
+		tree.traverse(tr.frameworks, {
+			onleaf = function(node)
+				if path.isabsolute(node.path) then
+					local nodedir = path.getdirectory(node.path)
+					if not table.contains(frameworkpaths, nodedir) then
+						table.insert(frameworkpaths, nodedir)
+					end
+				end
+			end
+		})
+
+		if #frameworkpaths > 1 then
+			xcode.printdirlist(frameworkpaths, 'FRAMEWORK_SEARCH_PATHS')
+		end
 
 		_p(4,'GCC_DYNAMIC_NO_PIC = NO;')
 		_p(4,'GCC_MODEL_TUNING = G5;')
