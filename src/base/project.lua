@@ -579,6 +579,8 @@
 		local max = abspath:len() - fname:len()
 
 		-- Look for matching patterns
+		local matched = false
+
 		for replacement, patterns in pairs(prj.vpaths or {}) do
 			for _, pattern in ipairs(patterns) do
 				local i = abspath:find(path.wildcards(pattern))
@@ -625,8 +627,12 @@
 
 					vpath = path.join(stem, leaf)
 
+					matched = true
+					break
 				end
 			end
+
+			if matched then break end
 		end
 
 		-- remove any dot ("./", "../") patterns from the start of the path
