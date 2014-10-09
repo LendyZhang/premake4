@@ -782,13 +782,13 @@
 			_p(4,'INFOPLIST_FILE = "%s";', tr.infoplist.cfg.name)
 		end
 
-		installpaths = {
-			ConsoleApp = '/usr/local/bin',
-			WindowedApp = '"$(HOME)/Applications"',
-			SharedLib = '/usr/local/lib',
-			StaticLib = '/usr/local/lib',
-		}
-		_p(4,'INSTALL_PATH = %s;', installpaths[cfg.kind])
+		-- installpaths = {
+		-- 	ConsoleApp = '/usr/local/bin',
+		-- 	WindowedApp = '"$(HOME)/Applications"',
+		-- 	SharedLib = '/usr/local/lib',
+		-- 	StaticLib = '/usr/local/lib',
+		-- }
+		-- _p(4,'INSTALL_PATH = %s;', installpaths[cfg.kind])
 
 		_p(4,'PRODUCT_NAME = "%s";', cfg.buildtarget.basename)
 		_p(3,'};')
@@ -826,7 +826,17 @@
 		end
 		
 		_p(4,'GCC_C_LANGUAGE_STANDARD = gnu99;')
-		
+		_p(4,'CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";')
+		_p(4,'CLANG_CXX_LIBRARY = "libc++";')
+
+		if cfg.flags.EnableSSE4 then
+			_p(4,'CLANG_X86_VECTOR_INSTRUCTIONS = sse4.2;')
+		end
+
+		if cfg.flags.LinkTimeOptimize then
+			_p(4,'LLVM_LTO = YES;')
+		end
+
 		if cfg.flags.NoExceptions then
 			_p(4,'GCC_ENABLE_CPP_EXCEPTIONS = NO;')
 		end
@@ -846,7 +856,7 @@
 		if cfg.flags.Optimize or cfg.flags.OptimizeSize then
 			_p(4,'GCC_OPTIMIZATION_LEVEL = s;')
 		elseif cfg.flags.OptimizeSpeed then
-			_p(4,'GCC_OPTIMIZATION_LEVEL = 3;')
+			_p(4,'GCC_OPTIMIZATION_LEVEL = fast;')
 		else
 			_p(4,'GCC_OPTIMIZATION_LEVEL = 0;')
 		end
@@ -864,8 +874,8 @@
 			_p(4,'GCC_TREAT_WARNINGS_AS_ERRORS = YES;')
 		end
 		
-		_p(4,'GCC_WARN_ABOUT_RETURN_TYPE = YES;')
-		_p(4,'GCC_WARN_UNUSED_VARIABLE = YES;')
+		-- _p(4,'GCC_WARN_ABOUT_RETURN_TYPE = YES;')
+		-- _p(4,'GCC_WARN_UNUSED_VARIABLE = YES;')
 
 		xcode.printdirlist(cfg.includedirs, 'HEADER_SEARCH_PATHS')
 		xcode.printdirlist(cfg.libdirs, 'LIBRARY_SEARCH_PATHS')

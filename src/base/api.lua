@@ -99,10 +99,12 @@
 					DebugEnvsInherit = 1,
 					EnableSSE = 1,
 					EnableSSE2 = 1,
+					EnableSSE4 = 1,
 					ExtraWarnings = 1,
 					FatalWarnings = 1,
 					FloatFast = 1,
 					FloatStrict = 1,
+					LinkTimeOptimize = 1,
 					Managed = 1,
 					MFC = 1,
 					NativeWChar = 1,
@@ -118,6 +120,7 @@
 					NoPCH = 1,
 					NoRTTI = 1,
 					Optimize = 1,
+					OptimizeFull = 1,
 					OptimizeSize = 1,
 					OptimizeSpeed = 1,
 					SEH = 1,
@@ -131,7 +134,9 @@
 
 				local englishToAmericanSpelling =
 				{
+					linktimeoptimise = 'linktimeoptimize',
 					optimise = 'optimize',
+					optimisefull = 'optimizefull',
 					optimisesize = 'optimizesize',
 					optimisespeed = 'optimizespeed',
 				}
