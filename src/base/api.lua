@@ -73,6 +73,21 @@
 			usagecopy = true,
 		},
 
+		deploymenttarget =
+		{
+			kind = "string",
+			scope = "config",
+			allowed = {
+				"OSX10.8",
+				"OSX10.9",
+				"OSX10.10",
+				"iOS6.0",
+				"iOS7.0",
+				"iOS7.1",
+				"iOS8.0"
+			}
+		},
+
 		excludes =
 		{
 			kind  = "filelist",
