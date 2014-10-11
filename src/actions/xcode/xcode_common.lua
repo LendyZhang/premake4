@@ -803,17 +803,26 @@
 		_p(2,'%s /* %s */ = {', cfg.xcode.projectid, cfgname)
 		_p(3,'isa = XCBuildConfiguration;')
 		_p(3,'buildSettings = {')
-		
-		local archs = {
-			Native = "$(NATIVE_ARCH_ACTUAL)",
-			x32    = "i386",
-			x64    = "x86_64",
-			Universal32 = "$(ARCHS_STANDARD_32_BIT)",
-			Universal64 = "$(ARCHS_STANDARD_64_BIT)",
-			Universal = "$(ARCHS_STANDARD_32_64_BIT)",
-		}
-		_p(4,'ARCHS = "%s";', archs[cfg.platform])
-		
+
+		if cfg.platform ~= "Native" then
+			local archs = {
+				Native = "$(NATIVE_ARCH_ACTUAL)",
+				x32    = "i386",
+				x64    = "x86_64",
+				Universal32 = "$(ARCHS_STANDARD_32_BIT)",
+				Universal64 = "$(ARCHS_STANDARD_64_BIT)",
+				Universal = "$(ARCHS_STANDARD_32_64_BIT)",
+			}
+			_p(4,'ARCHS = "%s";', archs[cfg.platform])
+		end
+
+		_p(4,'CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";')
+		_p(4,'CLANG_CXX_LIBRARY = "libc++";')
+
+		if cfg.flags.EnableSSE4 then
+			_p(4,'CLANG_X86_VECTOR_INSTRUCTIONS = sse4.2;')
+		end
+
 		local targetdir = path.getdirectory(cfg.buildtarget.bundlepath)
 		if targetdir ~= "." then
 			_p(4,'CONFIGURATION_BUILD_DIR = "$(SYMROOT)";');
@@ -824,18 +833,8 @@
 		if cfg.flags.Symbols then
 			_p(4,'COPY_PHASE_STRIP = NO;')
 		end
-		
+
 		_p(4,'GCC_C_LANGUAGE_STANDARD = gnu99;')
-		_p(4,'CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";')
-		_p(4,'CLANG_CXX_LIBRARY = "libc++";')
-
-		if cfg.flags.EnableSSE4 then
-			_p(4,'CLANG_X86_VECTOR_INSTRUCTIONS = sse4.2;')
-		end
-
-		if cfg.flags.LinkTimeOptimize then
-			_p(4,'LLVM_LTO = YES;')
-		end
 
 		if cfg.flags.NoExceptions then
 			_p(4,'GCC_ENABLE_CPP_EXCEPTIONS = NO;')
@@ -880,6 +879,21 @@
 		xcode.printdirlist(cfg.includedirs, 'HEADER_SEARCH_PATHS')
 		xcode.printdirlist(cfg.libdirs, 'LIBRARY_SEARCH_PATHS')
 		
+		if cfg.flags.LinkTimeOptimize then
+			_p(4,'LLVM_LTO = YES;')
+		end
+
+		if cfg.deploymenttarget then
+			local targets = {
+				["OSX10.8"]  = "10.8",
+				["OSX10.9"]  = "10.9",
+				["OSX10.10"] = "10.10"
+			}
+			if targets[cfg.deploymenttarget] then
+				_p(4,'MACOSX_DEPLOYMENT_TARGET = %s;', targets[cfg.deploymenttarget])
+			end
+		end
+
 		_p(4,'OBJROOT = "%s";', cfg.objectsdir)
 
 		_p(4,'ONLY_ACTIVE_ARCH = %s;',iif(premake.config.isdebugbuild(cfg),'YES','NO'))
