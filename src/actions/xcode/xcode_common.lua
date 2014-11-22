@@ -883,14 +883,27 @@
 			_p(4,'LLVM_LTO = YES;')
 		end
 
+		local isTargetingiOS = false;
+
 		if cfg.deploymenttarget then
-			local targets = {
+			local osxtargets = {
 				["OSX10.8"]  = "10.8",
 				["OSX10.9"]  = "10.9",
 				["OSX10.10"] = "10.10"
 			}
-			if targets[cfg.deploymenttarget] then
-				_p(4,'MACOSX_DEPLOYMENT_TARGET = %s;', targets[cfg.deploymenttarget])
+			if osxtargets[cfg.deploymenttarget] then
+				_p(4,'MACOSX_DEPLOYMENT_TARGET = %s;', osxtargets[cfg.deploymenttarget])
+			else
+				local iostargets = {
+					["iOS7.0"] = "7.0",
+					["iOS7.1"] = "7.1",
+					["iOS8.0"] = "8.0",
+					["iOS8.1"] = "8.1"
+				}
+				if iostargets[cfg.deploymenttarget] then
+					_p(4,'IPHONEOS_DEPLOYMENT_TARGET = %s;', iostargets[cfg.deploymenttarget])
+					isTargetingiOS = true;
+				end
 			end
 		end
 
@@ -928,13 +941,20 @@
 		if cfg.flags.StaticRuntime then
 			_p(4,'STANDARD_C_PLUS_PLUS_LIBRARY_TYPE = static;')
 		end
-		
+
+		if isTargetingiOS then
+			_p(4,'SDKROOT = iphoneos;')
+		end
+
 		if targetdir ~= "." then
 			_p(4,'SYMROOT = "%s";', targetdir)
 		end
 		
 		if cfg.flags.ExtraWarnings then
-			_p(4,'WARNING_CFLAGS = "-Wall";')
+			_p(4,'WARNING_CFLAGS = (')
+			_p(5,'"-Wall",')
+			_p(5,'"-Wextra",')
+			_p(4,');')
 		end
 		
 		_p(3,'};')
