@@ -356,8 +356,10 @@
 								error('relative paths are not currently supported for frameworks')
 							end
 							pth = nodePath
+							src = "<absolute>"
 						else
-							pth = "/System/Library/Frameworks/" .. nodePath
+							pth = "System/Library/Frameworks/" .. nodePath
+							src = "SDKROOT"
 						end
 						-- if it starts with a variable, use that as the src instead
 						if variable then
@@ -367,8 +369,6 @@
 							if string.find(pth, '^/') then
 								pth = string.sub(pth, 2)
 							end
-						else
-							src = "<absolute>"
 						end
 					else
 						-- something else; probably a source code file
