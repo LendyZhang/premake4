@@ -851,11 +851,13 @@
 		if cfg.flags.NoExceptions then
 			_p(4,'GCC_ENABLE_OBJC_EXCEPTIONS = NO;')
 		end
-		
-		if cfg.flags.Optimize or cfg.flags.OptimizeSize then
+
+		if cfg.flags.OptimizeFull then
+			_p(4,'GCC_OPTIMIZATION_LEVEL = fast;')
+		elseif cfg.flags.Optimize or cfg.flags.OptimizeSize then
 			_p(4,'GCC_OPTIMIZATION_LEVEL = s;')
 		elseif cfg.flags.OptimizeSpeed then
-			_p(4,'GCC_OPTIMIZATION_LEVEL = fast;')
+			_p(4,'GCC_OPTIMIZATION_LEVEL = 3;')
 		else
 			_p(4,'GCC_OPTIMIZATION_LEVEL = 0;')
 		end
