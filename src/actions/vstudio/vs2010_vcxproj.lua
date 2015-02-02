@@ -55,7 +55,7 @@
 	local function optimisation(cfg)
 		local result = "Disabled"
 		for _, value in ipairs(cfg.flags) do
-			if (value == "Optimize") then
+			if (value == "Optimize" or value == "OptimizeFull") then
 				result = "Full"
 			elseif (value == "OptimizeSize") then
 				result = "MinSpace"
@@ -78,6 +78,10 @@
 		_p(2,'<ConfigurationType>%s</ConfigurationType>',vc2010.config_type(cfg))
 		_p(2,'<UseDebugLibraries>%s</UseDebugLibraries>', iif(optimisation(cfg) == "Disabled","true","false"))
 		_p(2,'<CharacterSet>%s</CharacterSet>',iif(cfg.flags.Unicode,"Unicode","MultiByte"))
+
+		if cfg.flags.LinkTimeOptimize then
+			_p(2,'<WholeProgramOptimization>true</WholeProgramOptimization>')
+		end
 
 		local toolsets = { vs2012 = "v110", vs2013 = "v120" }
 		local toolset = toolsets[_ACTION]
@@ -370,6 +374,11 @@
 				_p(2,'<OutputFile>$(OutDir)%s</OutputFile>',cfg.buildtarget.name)
 				additional_options(2,cfg)
 				link_target_machine(2,cfg)
+
+				if cfg.flags.LinkTimeOptimize then
+					_p(2,'<LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>')
+				end
+
 			_p(1,'</Lib>')
 		end
 	end
@@ -421,6 +430,10 @@
 
 			link_target_machine(3,cfg)
 			additional_options(3,cfg)
+		end
+
+		if cfg.flags.LinkTimeOptimize then
+			_p(3,'<LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>')
 		end
 
 		_p(2,'</Link>')
