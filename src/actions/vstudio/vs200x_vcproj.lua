@@ -34,7 +34,7 @@
 	function vc200x.optimization(cfg)
 		local result = 0
 		for _, value in ipairs(cfg.flags) do
-			if (value == "Optimize") then
+			if (value == "Optimize" or value == "OptimizeFull") then
 				result = 3
 			elseif (value == "OptimizeSize") then
 				result = 1
@@ -98,6 +98,9 @@
 		_p(3,'CharacterSet="%s"', iif(cfg.flags.Unicode, 1, 2))
 		if cfg.flags.Managed then
 			_p(3,'ManagedExtensions="1"')
+		end
+		if cfg.flags.LinkTimeOptimize then
+			_p(3,'WholeProgramOptimization="1"')
 		end
 		_p(3,'>')
 	end
@@ -386,7 +389,11 @@
 				_p(4,'OptimizeReferences="2"')
 				_p(4,'EnableCOMDATFolding="2"')
 			end
-			
+
+			if cfg.flags.LinkTimeOptimize then
+				_p(4,'LinkTimeCodeGeneration="1"')
+			end
+
 			if (cfg.kind == "ConsoleApp" or cfg.kind == "WindowedApp") and not cfg.flags.WinMain then
 				_p(4,'EntryPointSymbol="mainCRTStartup"')
 			end
