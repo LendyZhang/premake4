@@ -19,7 +19,7 @@
 
 	function premake.config.isdebugbuild(cfg)
 		-- If any of the optimize flags are set, it's a release a build
-		if cfg.flags.Optimize or cfg.flags.OptimizeSize or cfg.flags.OptimizeSpeed then
+		if cfg.flags.Optimize or cfg.flags.OptimizeSize or cfg.flags.OptimizeSpeed or cfg.flags.OptimizeFull then
 			return false
 		end
 		-- If symbols are not defined, it's a release build
@@ -51,6 +51,6 @@
 --
 	
 	function premake.config.isoptimizedbuild(flags)
-		return flags.Optimize or flags.OptimizeSize or flags.OptimizeSpeed
+		return flags.Optimize or flags.OptimizeSize or flags.OptimizeSpeed or flags.OptimizeFull
 	end
 
