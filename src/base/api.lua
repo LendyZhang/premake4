@@ -254,6 +254,26 @@
 			}
 		},
 
+		languagedialect =
+		{
+			kind = "string",
+			scope = "container",
+			allowed = {
+				"c89",
+				"c99",
+				"c11",
+				"gnu89",
+				"gnu99",
+				"gnu11",
+				"c++98",
+				"c++11",
+				"c++14",
+				"gnu++98",
+				"gnu++11",
+				"gnu++14",
+			}
+		},
+
 		libdirs =
 		{
 			kind  = "dirlist",
