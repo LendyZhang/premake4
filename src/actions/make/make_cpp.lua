@@ -258,7 +258,7 @@
 		_p('  ALL_LDFLAGS   += $(LDFLAGS)%s', make.list(table.join(cc.getlibdirflags(cfg), cc.getldflags(cfg), cfg.linkoptions)))
 
 		_p('  LDDEPS    +=%s', make.list(_MAKE.esc(premake.getlinks(cfg, "siblings", "fullpath"))))
-		_p('  LIBS      += $(LDDEPS)%s', make.list(cc.getlinkflags(cfg)))
+		_p('  LIBS      +=%s', make.list(cc.getlinkflags(cfg)))
 
 		if cfg.kind == "StaticLib" then
 			if cfg.platform:startswith("Universal") then
@@ -328,7 +328,7 @@
 		_p('\t@echo $(notdir $<)')
 
 		local cmd = iif(prj.language == "C", "$(CC) -x c-header $(ALL_CFLAGS)", "$(CXX) -x c++-header $(ALL_CXXFLAGS)")
-		_p('\t$(SILENT) %s -MMD -MP $(DEFINES) $(INCLUDES) -o "$@" -MF "$(@:%%.gch=%%.d)" -c "$<"', cmd)
+		_p('\t$(SILENT) %s -o "$@" -MF "$(@:%%.gch=%%.d)" -c "$<"', cmd)
 
 		_p('endif')
 		_p('')

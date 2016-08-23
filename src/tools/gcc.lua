@@ -23,23 +23,46 @@
 
 	local cflags =
 	{
-		EnableSSE      = "-msse",
-		EnableSSE2     = "-msse2",
-		ExtraWarnings  = "-Wall -Wextra",
-		FatalWarnings  = "-Werror",
-		FloatFast      = "-ffast-math",
-		FloatStrict    = "-ffloat-store",
-		NoFramePointer = "-fomit-frame-pointer",
-		Optimize       = "-O2",
-		OptimizeSize   = "-Os",
-		OptimizeSpeed  = "-O3",
-		Symbols        = "-g",
+		EnableSSE        = "-msse -mfpmath=sse",
+		EnableSSE2       = "-msse2 -mfpmath=sse",
+		EnableSSE4       = "-msse4",
+		ExtraWarnings    = "-Wall -Wextra",
+		FatalWarnings    = "-Werror",
+		FloatFast        = "-ffast-math",
+		FloatStrict      = "-ffloat-store",
+		LinkTimeOptimize = "-flto",
+		NoFramePointer   = "-fomit-frame-pointer",
+		Optimize         = "-O2",
+		OptimizeSize     = "-Os",
+		OptimizeSpeed    = "-O3",
+		OptimizeFull     = "-Ofast",
+		Symbols          = "-g",
 	}
 
 	local cxxflags =
 	{
-		NoExceptions   = "-fno-exceptions",
-		NoRTTI         = "-fno-rtti",
+		NoExceptions     = "-fno-exceptions",
+		NoRTTI           = "-fno-rtti",
+	}
+
+	local cdialectflags =
+	{
+		["c89"]   = 1,
+		["c99"]   = 1,
+		["c11"]   = 1,
+		["gnu89"] = 1,
+		["gnu99"] = 1,
+		["gnu11"] = 1,
+	}
+
+	local cxxdialectflags =
+	{
+		["c++98"]   = 1,
+		["c++11"]   = 1,
+		["c++14"]   = 1,
+		["gnu++98"] = 1,
+		["gnu++11"] = 1,
+		["gnu++14"] = 1,
 	}
 
 
@@ -116,6 +139,15 @@
 	function premake.gcc.getcflags(cfg)
 		local result = table.translate(cfg.flags, cflags)
 		table.insert(result, platforms[cfg.platform].flags)
+
+		-- Add C language dialect.
+		if cfg.languagedialect ~= nil then
+			local std = string.lower(cfg.languagedialect)
+			if cdialectflags[std] ~= nil then
+				table.insert(result, "-std=" .. std)
+			end
+		end
+
 		if cfg.system ~= "windows" and cfg.kind == "SharedLib" then
 			table.insert(result, "-fPIC")
 		end
@@ -125,6 +157,14 @@
 
 	function premake.gcc.getcxxflags(cfg)
 		local result = table.translate(cfg.flags, cxxflags)
+
+		-- Add C++ language dialect.
+		if cfg.languagedialect ~= nil then
+			local std = string.lower(cfg.languagedialect)
+			if cxxdialectflags[std] ~= nil then
+				table.insert(result, "-std=" .. std)
+			end
+		end
 		return result
 	end
 
@@ -193,6 +233,9 @@
 
 	function premake.gcc.getlinkflags(cfg)
 		local result = {}
+		for _, value in ipairs(premake.getlinks(cfg, "siblings", "basename")) do
+			table.insert(result, '-l' .. _MAKE.esc(value))
+		end
 		for _, value in ipairs(premake.getlinks(cfg, "system", "name")) do
 			if path.getextension(value) == ".framework" then
 				table.insert(result, '-framework ' .. _MAKE.esc(path.getbasename(value)))
