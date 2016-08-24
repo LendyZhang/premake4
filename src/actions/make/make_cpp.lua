@@ -139,9 +139,9 @@
 		_p('endif')
 		_p('')
 
-		_p('CC = %s', cc.cc)
-		_p('CXX = %s', cc.cxx)
-		_p('AR = %s', cc.ar)
+		_p('CC = %s', prj.ccompiler or cc.cc)
+		_p('CXX = %s', prj.cxxcompiler or cc.cxx)
+		_p('AR = %s', prj.archiver or cc.ar)
 		_p('')
 
 		_p('ifndef RESCOMP')

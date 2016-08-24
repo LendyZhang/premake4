@@ -23,6 +23,8 @@ Makefile
 *.workspace
 *.project
 *.tags
+*.exvim
+.exvim.*
 
 *.bbprojectsettings
 Scratchpad.txt

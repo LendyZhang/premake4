@@ -26,6 +26,7 @@
 		EnableSSE        = "-msse -mfpmath=sse",
 		EnableSSE2       = "-msse2 -mfpmath=sse",
 		EnableSSE4       = "-msse4",
+		EnableNEON       = "-mfloat-abi=softfp -mfpu=neon",
 		ExtraWarnings    = "-Wall -Wextra",
 		FatalWarnings    = "-Werror",
 		FloatFast        = "-ffast-math",
@@ -183,6 +184,10 @@
 			else
 				table.insert(result, "-s")
 			end
+		end
+
+		if cfg.flags.EnableNEON then
+			table.insert(result, cflags.EnableNEON)
 		end
 
 		if cfg.kind == "SharedLib" then

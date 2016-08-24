@@ -12,6 +12,12 @@
 
 	premake.fields =
 	{
+		archiver =
+		{
+			kind  = "path",
+			scope = "container",
+		},
+
 		basedir =
 		{
 			kind  = "path",
@@ -36,10 +42,22 @@
 			scope = "config",
 		},
 
+		ccompiler =
+		{
+			kind  = "path",
+			scope = "container",
+		},
+
 		configurations =
 		{
 			kind  = "list",
 			scope = "solution",
+		},
+
+		cxxcompiler =
+		{
+			kind  = "path",
+			scope = "container",
 		},
 
 		debugargs =
@@ -115,6 +133,7 @@
 					EnableSSE = 1,
 					EnableSSE2 = 1,
 					EnableSSE4 = 1,
+					EnableNEON = 1,
 					ExtraWarnings = 1,
 					FatalWarnings = 1,
 					FloatFast = 1,
