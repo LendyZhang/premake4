@@ -26,7 +26,7 @@
 		EnableSSE        = "-msse -mfpmath=sse",
 		EnableSSE2       = "-msse2 -mfpmath=sse",
 		EnableSSE4       = "-msse4",
-		EnableNEON       = "-mfloat-abi=softfp -mfpu=neon",
+		EnableNEON       = "-march=armv7-a -mfloat-abi=softfp -mfpu=neon",
 		ExtraWarnings    = "-Wall -Wextra",
 		FatalWarnings    = "-Werror",
 		FloatFast        = "-ffast-math",
@@ -187,7 +187,21 @@
 		end
 
 		if cfg.flags.EnableNEON then
-			table.insert(result, cflags.EnableNEON)
+			table.insert(result, "-march=armv7-a -Wl,--fix-cortex-a8")
+		end
+
+		if cfg.flags.LinkTimeOptimize then
+			table.insert(result, "-flto")
+
+			if cfg.flags.OptimizeFull then
+				table.insert(result, cflags.OptimizeFull)
+			elseif cfg.flags.OptimizeSpeed then
+				table.insert(result, cflags.OptimizeSpeed)
+			elseif cfg.flags.OptimizeSize then
+				table.insert(result, cflags.OptimizeSize)
+			elseif cfg.flags.Optimize then
+				table.insert(result, cflags.Optimize)
+			end
 		end
 
 		if cfg.kind == "SharedLib" then
