@@ -46,26 +46,6 @@
 		NoRTTI           = "-fno-rtti",
 	}
 
-	local cdialectflags =
-	{
-		["c89"]   = 1,
-		["c99"]   = 1,
-		["c11"]   = 1,
-		["gnu89"] = 1,
-		["gnu99"] = 1,
-		["gnu11"] = 1,
-	}
-
-	local cxxdialectflags =
-	{
-		["c++98"]   = 1,
-		["c++11"]   = 1,
-		["c++14"]   = 1,
-		["gnu++98"] = 1,
-		["gnu++11"] = 1,
-		["gnu++14"] = 1,
-	}
-
 
 --
 -- Map platforms to flags
@@ -142,11 +122,8 @@
 		table.insert(result, platforms[cfg.platform].flags)
 
 		-- Add C language dialect.
-		if cfg.languagedialect ~= nil then
-			local std = string.lower(cfg.languagedialect)
-			if cdialectflags[std] ~= nil then
-				table.insert(result, "-std=" .. std)
-			end
+		if cfg.cdialect then
+			table.insert(result, "-std=" .. cfg.cdialect)
 		end
 
 		if cfg.system ~= "windows" and cfg.kind == "SharedLib" then
@@ -160,11 +137,8 @@
 		local result = table.translate(cfg.flags, cxxflags)
 
 		-- Add C++ language dialect.
-		if cfg.languagedialect ~= nil then
-			local std = string.lower(cfg.languagedialect)
-			if cxxdialectflags[std] ~= nil then
-				table.insert(result, "-std=" .. std)
-			end
+		if cfg.cxxdialect then
+			table.insert(result, "-std=" .. cfg.cxxdialect)
 		end
 		return result
 	end

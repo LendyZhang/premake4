@@ -48,6 +48,20 @@
 			scope = "container",
 		},
 
+		cdialect =
+		{
+			kind = "string",
+			scope = "container",
+			allowed = {
+				"c89",
+				"c99",
+				"c11",
+				"gnu89",
+				"gnu99",
+				"gnu11",
+			}
+		},
+
 		configurations =
 		{
 			kind  = "list",
@@ -58,6 +72,20 @@
 		{
 			kind  = "path",
 			scope = "container",
+		},
+
+		cxxdialect =
+		{
+			kind = "string",
+			scope = "container",
+			allowed = {
+				"c++98",
+				"c++11",
+				"c++14",
+				"gnu++98",
+				"gnu++11",
+				"gnu++14",
+			}
 		},
 
 		debugargs =
@@ -270,26 +298,6 @@
 				"C",
 				"C++",
 				"C#"
-			}
-		},
-
-		languagedialect =
-		{
-			kind = "string",
-			scope = "container",
-			allowed = {
-				"c89",
-				"c99",
-				"c11",
-				"gnu89",
-				"gnu99",
-				"gnu11",
-				"c++98",
-				"c++11",
-				"c++14",
-				"gnu++98",
-				"gnu++11",
-				"gnu++14",
 			}
 		},
 
