@@ -816,7 +816,10 @@
 			_p(4,'ARCHS = "%s";', archs[cfg.platform])
 		end
 
-		_p(4,'CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";')
+		if cfg.cxxdialect then
+			_p(4,'CLANG_CXX_LANGUAGE_STANDARD = "%s";', cfg.cxxdialect)
+		end
+
 		_p(4,'CLANG_CXX_LIBRARY = "libc++";')
 
 		if cfg.flags.EnableSSE4 then
@@ -834,7 +837,9 @@
 			_p(4,'COPY_PHASE_STRIP = NO;')
 		end
 
-		_p(4,'GCC_C_LANGUAGE_STANDARD = gnu99;')
+		if cfg.cdialect then
+			_p(4,'GCC_C_LANGUAGE_STANDARD = "%s";', cfg.cdialect)
+		end
 
 		if cfg.flags.NoExceptions then
 			_p(4,'GCC_ENABLE_CPP_EXCEPTIONS = NO;')
