@@ -319,56 +319,53 @@
 
 	function xcode.PBXFileReference(tr)
 		_p('/* Begin PBXFileReference section */')
-		
+
 		tree.traverse(tr, {
 			onleaf = function(node)
 				-- I'm only listing files here, so ignore anything without a path
 				if not node.path then
 					return
 				end
-				
+
 				-- is this the product node, describing the output target?
 				if node.kind == "product" then
 					_p(2,'%s /* %s */ = {isa = PBXFileReference; explicitFileType = %s; includeInIndex = 0; name = "%s"; path = "%s"; sourceTree = BUILT_PRODUCTS_DIR; };',
 						node.id, node.name, xcode.gettargettype(node), node.name, path.getname(node.cfg.buildtarget.bundlepath))
-						
+
 				-- is this a project dependency?
 				elseif node.parent.parent == tr.projects then
 					local relpath = path.getrelative(tr.project.location, node.parent.project.location)
 					_p(2,'%s /* %s */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "%s"; path = "%s"; sourceTree = SOURCE_ROOT; };',
 						node.parent.id, node.parent.name, node.parent.name, path.join(relpath, node.parent.name))
-					
+
 				-- something else
 				else
 					local pth, src
 					if xcode.isframework(node.path) then
-						--respect user supplied paths
+						-- respect user supplied paths
 						-- look for special variable-starting paths for different sources
 						local nodePath = node.path
-						local _, matchEnd, variable = string.find(nodePath, "^%$%((.+)%)/")
+						local _, matchEnd, variable = string.find(nodePath, "^%$%((.+)%)/+")
+
+						-- if it starts with a variable, use that as the src instead
 						if variable then
-							-- by skipping the last '/' we support the same absolute/relative
-							-- paths as before
-							nodePath = string.sub(nodePath, matchEnd + 1)
-						end
-						if string.find(nodePath,'/')  then
-							if string.find(nodePath,'^%.')then
-								error('relative paths are not currently supported for frameworks')
+							pth = string.sub(nodePath, matchEnd + 1)
+							src = variable
+
+						-- if it is a path, convert to absolute path
+						elseif string.find(nodePath, '/') then
+							if string.find(nodePath, '^%.') then
+								if node.cfg then
+									nodePath = path.getabsolute(path.join(node.cfg.project.location, nodePath))
+								else
+									error('relative paths are not currently supported for frameworks')
+								end
 							end
 							pth = nodePath
 							src = "<absolute>"
 						else
 							pth = "System/Library/Frameworks/" .. nodePath
 							src = "SDKROOT"
-						end
-						-- if it starts with a variable, use that as the src instead
-						if variable then
-							src = variable
-							-- if we are using a different source tree, it has to be relative
-							-- to that source tree, so get rid of any leading '/'
-							if string.find(pth, '^/') then
-								pth = string.sub(pth, 2)
-							end
 						end
 					else
 						-- something else; probably a source code file
@@ -382,13 +379,13 @@
 							pth = tree.getlocalpath(node)
 						end
 					end
-					
+
 					_p(2,'%s /* %s */ = {isa = PBXFileReference; lastKnownFileType = %s; name = "%s"; path = "%s"; sourceTree = "%s"; };',
 						node.id, node.name, xcode.getfiletype(node), node.name, pth, src)
 				end
 			end
 		})
-		
+
 		_p('/* End PBXFileReference section */')
 		_p('')
 	end
