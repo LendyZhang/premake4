@@ -352,17 +352,16 @@
 							pth = string.sub(nodePath, matchEnd + 1)
 							src = variable
 
-						-- if it is a path, convert to absolute path
+						-- or else, if it is a path
 						elseif string.find(nodePath, '/') then
-							if string.find(nodePath, '^%.') then
-								if node.cfg then
-									nodePath = path.getabsolute(path.join(node.cfg.project.location, nodePath))
-								else
-									error('relative paths are not currently supported for frameworks')
-								end
-							end
 							pth = nodePath
-							src = "<absolute>"
+							if path.isabsolute(nodePath) then
+								src = "<absolute>"
+							else
+								src = "SOURCE_ROOT"
+							end
+
+						-- otherwise, it is a system framework
 						else
 							pth = "System/Library/Frameworks/" .. nodePath
 							src = "SDKROOT"
