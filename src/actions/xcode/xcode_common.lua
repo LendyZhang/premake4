@@ -758,7 +758,7 @@
 
 		tree.traverse(tr.frameworks, {
 			onleaf = function(node)
-				if path.isabsolute(node.path) then
+				if string.find(node.path, "/", nil, true) then
 					local nodedir = path.getdirectory(node.path)
 					if not table.contains(frameworkpaths, nodedir) then
 						table.insert(frameworkpaths, nodedir)
@@ -772,7 +772,7 @@
 		end
 
 		_p(4,'GCC_DYNAMIC_NO_PIC = NO;')
-		_p(4,'GCC_MODEL_TUNING = G5;')
+		-- _p(4,'GCC_MODEL_TUNING = G5;')
 
 		if tr.infoplist then
 			_p(4,'INFOPLIST_FILE = "%s";', tr.infoplist.cfg.name)
