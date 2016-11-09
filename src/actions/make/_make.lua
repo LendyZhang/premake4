@@ -75,6 +75,21 @@
 
 
 --
+-- Filter out the static library paths in a list of values.
+--
+
+	function make.getstaticlibs(value)
+		local result = { }
+		for _,v in ipairs(value) do
+			if string.match(v, "%.a$") then
+				table.insert(result, v)
+			end
+		end
+		return result
+	end
+
+
+--
 -- Get the makefile file name for a solution or a project. If this object is the
 -- only one writing to a location then I can use "Makefile". If more than one object
 -- writes to the same location I use name + ".make" to keep it unique.
