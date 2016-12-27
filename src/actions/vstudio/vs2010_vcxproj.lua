@@ -83,7 +83,7 @@
 			_p(2,'<WholeProgramOptimization>true</WholeProgramOptimization>')
 		end
 
-		local toolsets = { vs2012 = "v110", vs2013 = "v120" }
+		local toolsets = { vs2012 = "v110", vs2013 = "v120", vs2015 = "v140" }
 		local toolset = toolsets[_ACTION]
 		if toolset then
 			_p(2,'<PlatformToolset>%s</PlatformToolset>', toolset)
@@ -566,6 +566,8 @@
 --
 
 	function vc2010.header(targets)
+		local action = premake.action.current()
+
 		io.eol = "\r\n"
 		_p('<?xml version="1.0" encoding="utf-8"?>')
 
@@ -574,7 +576,12 @@
 			t = ' DefaultTargets="' .. targets .. '"'
 		end
 
-		_p('<Project%s ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">', t)
+		local toolversion = ''
+		if action.vstudio.toolsVersion then
+			toolversion = string.format(' ToolsVersion="%s"', action.vstudio.toolsVersion)
+		end
+
+		_p('<Project%s%s xmlns="http://schemas.microsoft.com/developer/msbuild/2003">', t, toolversion)
 	end
 
 
