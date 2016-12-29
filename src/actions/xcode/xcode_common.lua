@@ -786,6 +786,11 @@
 		-- }
 		-- _p(4,'INSTALL_PATH = %s;', installpaths[cfg.kind])
 
+		if cfg.flags.RuntimeSearchPath then
+			_p(4,'INSTALL_PATH = "@rpath";')
+			_p(4,'LD_RUNPATH_SEARCH_PATHS = "@loader_path";')
+		end
+
 		_p(4,'PRODUCT_NAME = "%s";', cfg.buildtarget.basename)
 		_p(3,'};')
 		_p(3,'name = "%s";', cfgname)
