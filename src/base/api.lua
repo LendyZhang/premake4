@@ -472,6 +472,17 @@
 			scope = "container",
 		},
 
+		custombuild_qtbin =
+		{
+			kind  = "path",
+			scope = "config",
+		},
+
+		custombuild_qtgendir =
+		{
+			kind  = "path",
+			scope = "config",
+		},
 	}
 
 
