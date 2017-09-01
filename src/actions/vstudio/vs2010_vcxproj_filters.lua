@@ -6,7 +6,7 @@
 
 	local vc2010 = premake.vstudio.vc2010
 	local project = premake.project
-	local qt = premake.vstudio.qt
+	local qt = premake.qt
 
 --
 -- The first portion of the filters file assigns unique IDs to each
@@ -53,43 +53,15 @@
 --
 -- The second portion of the filters file assigns filters to each source
 -- code file, as needed. Section is one of "ClCompile", "ClInclude", 
--- "ResourceCompile", or "None".
+-- "ResourceCompile", "None" or others for  qt extentions
 --
-
-	function vc2010.filefiltergroup(prj, section)
-		local files = vc2010.getfilegroup(prj, section)
-		if #files > 0 then
-			_p(1,'<ItemGroup>')
-			for _, file in ipairs(files) do
-				local filter
-				if file.name ~= file.vpath then
-					filter = path.getdirectory(file.vpath)
-				else
-					filter = path.getdirectory(file.name)
-				end				
-				
-				if filter ~= "." then
-					_p(2,'<%s Include=\"%s\">', section, path.translate(file.name, "\\"))
-						_p(3,'<Filter>%s</Filter>', path.translate(filter, "\\"))
-					_p(2,'</%s>', section)
-				else
-					_p(2,'<%s Include=\"%s\" />', section, path.translate(file.name, "\\"))
-				end
-			end
-			_p(1,'</ItemGroup>')
-		end
-	end
-
---
--- Qt group and file filter Extensions
---
-	qt.section_groupname_map =
+	vc2010.section_groupname_map =
 	{
 		["ClInclude"]		= "ClInclude",
 		["ClCompile"]		= "ClCompile",
 		["None"]			= "None",
 		["ResourceCompile"]	= "ResourceCompile",
-
+-- Qt group and file filter Extensions
 		["UI"]				= "CustomBuild",
 		["QRC"]				= "CustomBuild",
 		["QObject"]			= "CustomBuild",
@@ -97,9 +69,9 @@
 		["GeneratedCpp"]	= "ClCompile"
 	}
 
-	function qt.filefiltergroup(prj, section)
-		local files = qt.getfilegroup(prj, section)
-		local gname = qt.section_groupname_map[section]
+	function vc2010.filefiltergroup(prj, section)
+		local files = vc2010.getfilegroup(prj, section)
+		local gname = vc2010.section_groupname_map[section]
 		if #files > 0 then
 			-- add qt generated files filter
 			if section == "GeneratedCpp" then
@@ -139,20 +111,16 @@
 		io.indent = "  "
 		vc2010.header()
 			vc2010.filteridgroup(prj)
-			--vc2010.filefiltergroup(prj, "None")
-			--vc2010.filefiltergroup(prj, "ClInclude")
-			--vc2010.filefiltergroup(prj, "ClCompile")
-			--vc2010.filefiltergroup(prj, "ResourceCompile")
 
-			qt.filefiltergroup(prj, "None")
-			qt.filefiltergroup(prj, "ClInclude")
-			qt.filefiltergroup(prj, "ClCompile")
-			qt.filefiltergroup(prj, "ResourceCompile")
+			vc2010.filefiltergroup(prj, "None")
+			vc2010.filefiltergroup(prj, "ClInclude")
+			vc2010.filefiltergroup(prj, "ClCompile")
+			vc2010.filefiltergroup(prj, "ResourceCompile")
 
-			qt.filefiltergroup(prj, "UI")
-			qt.filefiltergroup(prj, "QRC")
-			qt.filefiltergroup(prj, "QObject")
+			vc2010.filefiltergroup(prj, "UI")
+			vc2010.filefiltergroup(prj, "QRC")
+			vc2010.filefiltergroup(prj, "QObject")
 
-			qt.filefiltergroup(prj, "GeneratedCpp")
+			vc2010.filefiltergroup(prj, "GeneratedCpp")
 		_p('</Project>')
 	end

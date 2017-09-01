@@ -7,9 +7,7 @@
 	premake.vstudio.vc2010 = { }
 	local vc2010 = premake.vstudio.vc2010
 	local vstudio = premake.vstudio
-
-	premake.vstudio.qt = {}
-	local qt = premake.vstudio.qt
+	local qt = premake.qt
 
 
 	local function vs2010_config(prj)
@@ -482,193 +480,6 @@
 --
 
 	function vc2010.getfilegroup(prj, group)
-		local sortedfiles = prj.vc2010sortedfiles
-		if not sortedfiles then
-			sortedfiles = {
-				ClCompile = {},
-				ClInclude = {},
-				None = {},
-				ResourceCompile = {},
-			}
-
-			for file in premake.project.eachfile(prj) do
-				if path.iscppfile(file.name) then
-					table.insert(sortedfiles.ClCompile, file)
-				elseif path.iscppheader(file.name) then
-					table.insert(sortedfiles.ClInclude, file)
-				elseif path.isresourcefile(file.name) then
-					table.insert(sortedfiles.ResourceCompile, file)
-				else
-					table.insert(sortedfiles.None, file)
-				end
-			end
-
-			-- Cache the sorted files; they are used several places
-			prj.vc2010sortedfiles = sortedfiles
-		end
-
-		return sortedfiles[group]
-	end
-
-
---
--- Write the files section of the project file.
---
-
-	function vc2010.files(prj)
-		--same as vc2010 files group
-		qt.simplefilesgroup(prj, "ClInclude")
-		qt.compilerfilesgroup(prj)
-		qt.simplefilesgroup(prj, "None")
-		qt.simplefilesgroup(prj, "ResourceCompile")
-
-		-- qt custom file group
-		qt.customfilesgroup(prj, "UI")
-		qt.customfilesgroup(prj, "QRC")
-		qt.customfilesgroup(prj, "QObject")
-
-		-- qt generated files group
-		qt.generatedfilesgroup(prj)
-
-		-- src
-		--vc2010.simplefilesgroup(prj, "ClInclude")
-		--vc2010.compilerfilesgroup(prj)
-		--vc2010.simplefilesgroup(prj, "None")
-		--vc2010.simplefilesgroup(prj, "ResourceCompile")
-
-	end
-
-
-	function vc2010.simplefilesgroup(prj, section)
-		local files = vc2010.getfilegroup(prj, section)
-		if #files > 0  then
-			_p(1,'<ItemGroup>')
-			for _, file in ipairs(files) do
-				_p(2,'<%s Include=\"%s\" />', section, path.translate(file.name, "\\"))
-			end
-			_p(1,'</ItemGroup>')
-		end
-	end
-
-
-	function vc2010.compilerfilesgroup(prj)
-		local configs = prj.solution.vstudio_configs
-		local files = vc2010.getfilegroup(prj, "ClCompile")
-		if #files > 0  then
-			local config_mappings = {}
-			for _, cfginfo in ipairs(configs) do
-				local cfg = premake.getconfig(prj, cfginfo.src_buildcfg, cfginfo.src_platform)
-				if cfg.pchheader and cfg.pchsource and not cfg.flags.NoPCH then
-					config_mappings[cfginfo] = path.translate(cfg.pchsource, "\\")
-				end
-			end
-
-			_p(1,'<ItemGroup>')
-			for _, file in ipairs(files) do
-				local translatedpath = path.translate(file.name, "\\")
-				_p(2,'<ClCompile Include=\"%s\">', translatedpath)
-				for _, cfginfo in ipairs(configs) do
-					if config_mappings[cfginfo] and translatedpath == config_mappings[cfginfo] then
-						_p(3,'<PrecompiledHeader '.. if_config_and_platform() .. '>Create</PrecompiledHeader>', premake.esc(cfginfo.name))
-						config_mappings[cfginfo] = nil  --only one source file per pch
-					end
-				end
-				_p(2,'</ClCompile>')
-			end
-			_p(1,'</ItemGroup>')
-		end
-	end
----------------------------------------------------------------------------------------------------------------
---
--- Testing custom build file config
---
-
---
--- Retrieve a list of files for a particular build group, one of
--- "ClInclude", "ClCompile", "ResourceCompile", and "None".
---
-
-	function qt.extmatcher(fname, extension)
-		local ext = path.getextension(fname):lower()
-		return ext == extension
-	end
-
-	function qt.isuifile( fname )
-	-- body
-		return qt.extmatcher( fname, ".ui" )	
-	end
-
-	function qt.isqrcfile( fname )
-	-- body
-		return qt.extmatcher( fname, ".qrc" )
-	end
-
-	function qt.istsfile( fname )
-	-- body
-		return qt.extmatcher( fname, ".ts" )
-	end
-
-	function qt.isqobjectfile( prj, fname )
-	-- body
-		local isqobj = false
-		if path.iscppheader(fname) then
-			--because premake script in build director, fname relative to project directory
-			local absfname = prj.location.."/"..fname
-			--local relname = fname:sub(4)
-			local file = io.open(absfname)
-			if file ~= nil then
-				for line in file:lines() do
-					if line:find("^%s*Q_OBJECT%f[^%w_]") or line:find("^%s*Q_GADGET%f[^%w_]") then
-						isqobj = true
-						break
-					end
-				end
-				io.close(file)
-			else
-				print("file no open:" .. fname )
-			end
-		end
-
-		return isqobj
-	end
-
-	--add generated files to project
-	function qt.addgeneratedfile( cfg, genfilename )
-		table.insert( cfg.files, genfilename )
-	end
-
-	function qt.getgenerateddir( cfg )
-		if cfg.custombuild_qtgendir ~= nil then
-			return cfg.custombuild_qtgendir
-		end
-
-		if cfg.objdir ~= nil then
-			return cfg.objdir
-		end
-
-		return "./"
-	end
-
-	-- type for generated files: "moc" or "qrc"
-	function qt.getgeneratedfilename( generateddir, srcfilename, type )
-		--if generateddir == nil or srcfilename == nil or type == nil then
-		--	return nil
-		--end
-		local newfile = {}
-		local basename = path.getbasename(srcfilename)
-
-		if type == "ui" then
-			newfile.name  = generateddir.."/"..type.."_"..basename..".h"
-			newfile.vpath = "GeneratedFiles/"..basename..".h"
-		else
-			newfile.name  = generateddir.."/"..type.."_"..basename..".cpp"
-			newfile.vpath = "GeneratedFiles/"..basename..".cpp"
-		end
-		return newfile
-	end
-
-
-	function qt.getfilegroup(prj, group)
 		local sortedfiles = prj.qtsortedfiles
 		if not sortedfiles then
 			sortedfiles = {
@@ -744,174 +555,81 @@
 				-- add ui include path
 				table.insert( prj.includedirs, gendir )
 			end
-			--
-			--if #sortedfiles.GeneratedCpp > 0 then
-				-- add moc files and qrc files to project 
-			--	for _, gfile in ipairs(sortedfiles.GeneratedCpp) do
-			--		table.insert(prj.__fileconfigs, gfile)
-			--		table.insert(prj.files, gfile.name)
-			--	end
-			--end
-
 		end
 
 		return sortedfiles[group]
 	end
 
-	-- Utility: print table function
-	key = ""
-	function PrintTable(table , level)
-	  level = level or 1
-	  local indent = ""
-	  for i = 1, level do
-		indent = indent.."  "
-	  end
 
-	  if key ~= "" then
-		print(indent..key.." ".."=".." ".."{")
-	  else
-		print(indent .. "{")
-	  end
+--
+-- Write the files section of the project file.
+--
 
-	  key = ""
-	  for k,v in pairs(table) do
-		 if type(v) == "table" then
-			key = k
-			PrintTable(v, level + 1)
-		 else
-			local content = string.format("%s%s = %s", indent .. "  ",tostring(k), tostring(v))
-		  print(content)  
-		  end
-	  end
-	  print(indent .. "}")
+	function vc2010.files(prj)
+		--vc2010 files group
+		vc2010.simplefilesgroup(prj, "ClInclude")
+		vc2010.compilerfilesgroup(prj)
+		vc2010.simplefilesgroup(prj, "None")
+		vc2010.simplefilesgroup(prj, "ResourceCompile")
+
+		-- qt custom file group
+		vc2010.customfilesgroup(prj, "UI")
+		vc2010.customfilesgroup(prj, "QRC")
+		vc2010.customfilesgroup(prj, "QObject")
+
+		-- qt generated files group
+		vc2010.generatedfilesgroup(prj)
 
 	end
 
-	function qt.getbindir( cfg )
-		if cfg.custombuild_qtbin ~= nil then
-			return cfg.custombuild_qtbin
-		end
 
-		return "$(QTDIR)\\bin"
-	end
-
-	function qt.getgendir( cfg, fcfg )
-		if cfg.custombuild_qtgendir ~= nil then
-			return cfg.custombuild_qtgendir
-		end
-
-		if cfg.objdir ~= nil then
-			return cfg.objdir
-		end
-
-		return  path.getdirectory(fcfg.name)
-	end
-
-	-- cfg: project config, fcfg: file config
-	function qt.addmocbuildrule( cfg, fcfg )
-		local fc = {}
-
-		fc.basename = path.getbasename(fcfg.name)
-		local gendir = qt.getgendir(cfg, fcfg)
-		local bindir = qt.getbindir(cfg, fcfg)
-
-		--local outputs = gendir.."/$(ConfigurationName)".."/moc_"..fc.basename..".cpp"
-		local outputs = gendir.."/moc_"..fc.basename..".cpp"
-		local command = bindir.."/moc \"%%(FullPath)\" -o \""..outputs.."\""
-
-		-- if has precompiled header, prepend it ( -b or -f ? )
-		if cfg.pchheader then
-			command = command.." -b\""..cfg.pchheader.."\""
-		end
-
-		-- append the defines
-		if #cfg.defines > 0 then
-			for _, def in ipairs(cfg.defines) do
-				command = command.." -D"..def
+	function vc2010.simplefilesgroup(prj, section)
+		local files = vc2010.getfilegroup(prj, section)
+		if #files > 0  then
+			_p(1,'<ItemGroup>')
+			for _, file in ipairs(files) do
+				_p(2,'<%s Include=\"%s\" />', section, path.translate(file.name, "\\"))
 			end
+			_p(1,'</ItemGroup>')
 		end
+	end
 
-		-- append the include directories
-		if #cfg.includedirs > 0 then
-			for _, inc in ipairs(cfg.includedirs) do
-				command = command.." -I\""..inc.."\""
+
+	function vc2010.compilerfilesgroup(prj)
+		local configs = prj.solution.vstudio_configs
+		local files = vc2010.getfilegroup(prj, "ClCompile")
+		if #files > 0  then
+			local config_mappings = {}
+			for _, cfginfo in ipairs(configs) do
+				local cfg = premake.getconfig(prj, cfginfo.src_buildcfg, cfginfo.src_platform)
+				if cfg.pchheader and cfg.pchsource and not cfg.flags.NoPCH then
+					config_mappings[cfginfo] = path.translate(cfg.pchsource, "\\")
+				end
 			end
-		end
-		-- custom command
-		-- none
 
-		fc.addtionalinputs	= "%%(AdditionalInputs)"
-		fc.message			= "Moc%%27ing"..fcfg.name
-		fc.command			= command
-		fc.outputs			= outputs
-
-		return fc
-	end
-
-	function qt.adduibuildrule( cfg, fcfg )
-		local fc = {}
-
-		fc.basename = path.getbasename(fcfg.name)
-
-		local gendir = qt.getgendir(cfg, fcfg)
-		local bindir = qt.getbindir(cfg, fcfg)
-
-		local outputs = gendir.."/ui_"..fc.basename..".h"
-		local command = bindir.."/uic -o \""..outputs.."\" \"%%(FullPath)\""
-		
-		fc.addtionalinputs	= "%%(AdditionalInputs)"
-		fc.message			= "Qt Uic'ing"..fcfg.name
-		fc.command			= command
-		fc.outputs			= outputs
-
-		return fc
-	end
-
-	function qt.addqrcbuildrule( cfg, fcfg )
-		local fc = {}
-
-		fc.basename = path.getbasename(fcfg.name)
-		local gendir = qt.getgendir(cfg, fcfg)
-		local bindir = qt.getbindir(cfg, fcfg)
-
-		local outputs = gendir.."/qrc_"..fc.basename..".cpp"
-		local command = bindir.."/rcc -name \"%%(Filename)\" -no-compress \"%%(FullPath)\" -o \""..outputs.."\""
-
-		fc.addtionalinputs	= "%%(FullPath);%%(AdditionalInputs)"
-		fc.message			= "Rcc%%27ing"..fcfg.name
-		fc.command			= command
-		fc.outputs			= outputs
-
-		--tesing print ui build rule
-		--print("GENDIR: "..gendir)
-		--print("BINDIR: "..bindir)
-		--print(fc.outputs)
-		--print(fc.message)
-		--print(fc.command)
-
-		return fc
-	end
-
-	-- add qt custom build rule by section
-	function qt.addcustombuildrule( cfg, fcfg, section )
-		if section == "UI" then
-			return qt.adduibuildrule( cfg, fcfg )
-		elseif section == "QRC" then
-			return qt.addqrcbuildrule( cfg, fcfg )
-		elseif section == "QObject" then
-			return qt.addmocbuildrule( cfg, fcfg )
-		else
-			print( "Error: Invalid custom rule group section"..section )
-			return nil
+			_p(1,'<ItemGroup>')
+			for _, file in ipairs(files) do
+				local translatedpath = path.translate(file.name, "\\")
+				_p(2,'<ClCompile Include=\"%s\">', translatedpath)
+				for _, cfginfo in ipairs(configs) do
+					if config_mappings[cfginfo] and translatedpath == config_mappings[cfginfo] then
+						_p(3,'<PrecompiledHeader '.. if_config_and_platform() .. '>Create</PrecompiledHeader>', premake.esc(cfginfo.name))
+						config_mappings[cfginfo] = nil  --only one source file per pch
+					end
+				end
+				_p(2,'</ClCompile>')
+			end
+			_p(1,'</ItemGroup>')
 		end
 	end
-
-
-
-	function qt.customfilesgroup(prj, section)
+---------------------------------------------------------------------------------------------------------------
+--
+-- for qt extension
+--
+	function vc2010.customfilesgroup(prj, section)
 
 		local configs = prj.solution.vstudio_configs
-		local files = qt.getfilegroup(prj, section)
+		local files = vc2010.getfilegroup(prj, section)
 
 		if #files > 0  then
 			print("Begin qt custom build ...")
@@ -923,10 +641,6 @@
 					config_mappings[cfginfo] = path.translate(cfg.pchsource, "\\")
 				end
 			end
-
-			--tesing print prj
-			--print("prj")
-			--PrintTable(prj, nil)
 
 			-- write to xml
 			_p(1,'<ItemGroup>')
@@ -955,50 +669,9 @@
 		end
 	end
 
-
-	function qt.simplefilesgroup(prj, section)
-		local files = qt.getfilegroup(prj, section)
-		if #files > 0  then
-			_p(1,'<ItemGroup>')
-			for _, file in ipairs(files) do
-				_p(2,'<%s Include=\"%s\" />', section, path.translate(file.name, "\\"))
-			end
-			_p(1,'</ItemGroup>')
-		end
-	end
-
-
-	function qt.compilerfilesgroup(prj)
+	function vc2010.generatedfilesgroup( prj )
 		local configs = prj.solution.vstudio_configs
-		local files = qt.getfilegroup(prj, "ClCompile")
-		if #files > 0  then
-			local config_mappings = {}
-			for _, cfginfo in ipairs(configs) do
-				local cfg = premake.getconfig(prj, cfginfo.src_buildcfg, cfginfo.src_platform)
-				if cfg.pchheader and cfg.pchsource and not cfg.flags.NoPCH then
-					config_mappings[cfginfo] = path.translate(cfg.pchsource, "\\")
-				end
-			end
-
-			_p(1,'<ItemGroup>')
-			for _, file in ipairs(files) do
-				local translatedpath = path.translate(file.name, "\\")
-				_p(2,'<ClCompile Include=\"%s\">', translatedpath)
-				for _, cfginfo in ipairs(configs) do
-					if config_mappings[cfginfo] and translatedpath == config_mappings[cfginfo] then
-						_p(3,'<PrecompiledHeader '.. if_config_and_platform() .. '>Create</PrecompiledHeader>', premake.esc(cfginfo.name))
-						config_mappings[cfginfo] = nil  --only one source file per pch
-					end
-				end
-				_p(2,'</ClCompile>')
-			end
-			_p(1,'</ItemGroup>')
-		end
-	end
-
-	function qt.generatedfilesgroup( prj )
-		local configs = prj.solution.vstudio_configs
-		local files = qt.getfilegroup(prj, "GeneratedCpp")
+		local files = vc2010.getfilegroup(prj, "GeneratedCpp")
 		if #files > 0  then
 			_p(1,'<ItemGroup>')
 			for _, file in ipairs(files) do
