@@ -6,7 +6,7 @@
 
 	local vc2010 = premake.vstudio.vc2010
 	local project = premake.project
-	local qt = premake.vstudio.qt
+	
 
 --
 -- The first portion of the filters file assigns unique IDs to each
@@ -80,79 +80,18 @@
 		end
 	end
 
---
--- Qt group and file filter Extensions
---
-	qt.section_groupname_map =
-	{
-		["ClInclude"]		= "ClInclude",
-		["ClCompile"]		= "ClCompile",
-		["None"]			= "None",
-		["ResourceCompile"]	= "ResourceCompile",
-
-		["UI"]				= "CustomBuild",
-		["QRC"]				= "CustomBuild",
-		["QObject"]			= "CustomBuild",
-
-		["GeneratedCpp"]	= "ClCompile"
-	}
-
-	function qt.filefiltergroup(prj, section)
-		local files = qt.getfilegroup(prj, section)
-		local gname = qt.section_groupname_map[section]
-		if #files > 0 then
-			-- add qt generated files filter
-			if section == "GeneratedCpp" then
-				_p(1,'<ItemGroup>')
-				_p(2, '<Filter Include="%s">', "GeneratedFiles")
-				_p(3, '<UniqueIdentifier>{%s}</UniqueIdentifier>', os.uuid())
-				_p(2, '</Filter>')
-				_p(1,'</ItemGroup>')
-			end
-
-			_p(1,'<ItemGroup>')
-			for _, file in ipairs(files) do
-				local filter
-				if file.name ~= file.vpath then
-					filter = path.getdirectory(file.vpath)
-				else
-					filter = path.getdirectory(file.name)
-				end				
-				
-				if filter ~= "." then
-					_p(2,'<%s Include=\"%s\">', gname, path.translate(file.name, "\\"))
-						_p(3,'<Filter>%s</Filter>', path.translate(filter, "\\"))
-					_p(2,'</%s>', gname)
-				else
-					_p(2,'<%s Include=\"%s\" />', gname, path.translate(file.name, "\\"))
-				end
-			end
-			_p(1,'</ItemGroup>')
-		end
-	end
 
 --
 -- Output the VC2010 filters file
 --
-
+	
 	function vc2010.generate_filters(prj)
 		io.indent = "  "
 		vc2010.header()
 			vc2010.filteridgroup(prj)
-			--vc2010.filefiltergroup(prj, "None")
-			--vc2010.filefiltergroup(prj, "ClInclude")
-			--vc2010.filefiltergroup(prj, "ClCompile")
-			--vc2010.filefiltergroup(prj, "ResourceCompile")
-
-			qt.filefiltergroup(prj, "None")
-			qt.filefiltergroup(prj, "ClInclude")
-			qt.filefiltergroup(prj, "ClCompile")
-			qt.filefiltergroup(prj, "ResourceCompile")
-
-			qt.filefiltergroup(prj, "UI")
-			qt.filefiltergroup(prj, "QRC")
-			qt.filefiltergroup(prj, "QObject")
-
-			qt.filefiltergroup(prj, "GeneratedCpp")
+			vc2010.filefiltergroup(prj, "None")
+			vc2010.filefiltergroup(prj, "ClInclude")
+			vc2010.filefiltergroup(prj, "ClCompile")
+			vc2010.filefiltergroup(prj, "ResourceCompile")
 		_p('</Project>')
 	end

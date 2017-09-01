@@ -13,5 +13,3 @@ A build configuration tool
 
  For questions, comments, or more information, visit the project
  website at http://industriousone.com/premake
-
-**USE Mercurial!!**
