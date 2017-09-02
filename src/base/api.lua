@@ -481,7 +481,7 @@
 		custombuild_qtgendir =
 		{
 			kind  = "path",
-			scope = "config",
+			scope = "container",
 		},
 	}
 

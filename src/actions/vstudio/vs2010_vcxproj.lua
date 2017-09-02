@@ -480,7 +480,7 @@
 --
 
 	function vc2010.getfilegroup(prj, group)
-		local sortedfiles = prj.qtsortedfiles
+		local sortedfiles = prj.vc2010sortedfiles
 		if not sortedfiles then
 			sortedfiles = {
 				ClCompile = {},
@@ -548,7 +548,7 @@
 			end
 
 			-- Cache the sorted files; they are used several places
-			prj.qtsortedfiles = sortedfiles
+			prj.vc2010sortedfiles = sortedfiles
 
 			-- Addtitional operations
 			if hasUI then
