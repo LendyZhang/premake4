@@ -497,16 +497,7 @@
 			}
 
 			local hasUI  = false
-			local gendir = nil
-			local configs = prj.solution.vstudio_configs
-
-			for _, cfginfo in ipairs(configs) do
-				local cfg = premake.getconfig(prj, cfginfo.src_buildcfg, cfginfo.src_platform)
-				gendir = qt.getgenerateddir(cfg)
-				if gendir ~= nil then
-					break
-				end
-			end
+			local gendir = qt.getgenerateddir(prj)
 
 			for file in premake.project.eachfile(prj) do
 				if path.iscppfile(file.name) then

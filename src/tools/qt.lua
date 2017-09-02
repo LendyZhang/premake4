@@ -56,13 +56,16 @@
 		table.insert( cfg.files, genfilename )
 	end
 
-	function qt.getgenerateddir( cfg )
-		if cfg.custombuild_qtgendir ~= nil then
-			return cfg.custombuild_qtgendir
+	function qt.getgenerateddir( prj )
+		local gendirPrj = prj.project;
+		if not gendirPrj then gendirPrj = premake.getconfig(prj) end
+
+		if gendirPrj.custombuild_qtgendir ~= nil then
+			return gendirPrj.custombuild_qtgendir
 		end
 
-		if cfg.objdir ~= nil then
-			return cfg.objdir
+		if gendirPrj.objdir ~= nil then
+			return gendirPrj.objdir
 		end
 
 		return "./"
