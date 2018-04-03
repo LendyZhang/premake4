@@ -407,7 +407,9 @@
 		-- write out project dependencies
 		tree.traverse(tr.projects, {
 			onleaf = function(node)
-				_p(4,'%s /* %s in Frameworks */,', node.buildid, node.name)
+				if node.buildid then
+					_p(4,'%s /* %s in Frameworks */,', node.buildid, node.name)
+				end
 			end
 		})
 		
