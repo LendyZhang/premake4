@@ -190,6 +190,10 @@
 			end
 		end
 
+		if cfg.flags.RuntimeSearchPath then
+			table.insert(result, "'-Wl,-rpath,$$ORIGIN'")
+		end
+
 		if cfg.kind == "WindowedApp" and cfg.system == "windows" then
 			table.insert(result, "-mwindows")
 		end
