@@ -67,7 +67,7 @@
 	function premake.snc.getcflags(cfg)
 		local result = table.translate(cfg.flags, cflags)
 		table.insert(result, platforms[cfg.platform].flags)
-		if cfg.kind == "SharedLib" then
+		if cfg.flags.PIC or cfg.kind == "SharedLib" then
 			table.insert(result, "-fPIC")
 		end
 		

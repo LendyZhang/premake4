@@ -185,6 +185,7 @@
 					OptimizeFull = 1,
 					OptimizeSize = 1,
 					OptimizeSpeed = 1,
+					PIC = 1,
 					RuntimeSearchPath = 1,
 					SEH = 1,
 					StaticATL = 1,

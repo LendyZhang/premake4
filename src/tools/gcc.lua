@@ -126,7 +126,7 @@
 			table.insert(result, "-std=" .. cfg.cdialect)
 		end
 
-		if cfg.system ~= "windows" and cfg.kind == "SharedLib" then
+		if cfg.flags.PIC or (cfg.system ~= "windows" and cfg.kind == "SharedLib") then
 			table.insert(result, "-fPIC")
 		end
 		return result
