@@ -606,6 +606,8 @@
 					if config_mappings[cfginfo] and translatedpath == config_mappings[cfginfo] then
 						_p(3,'<PrecompiledHeader '.. if_config_and_platform() .. '>Create</PrecompiledHeader>', premake.esc(cfginfo.name))
 						config_mappings[cfginfo] = nil  --only one source file per pch
+					elseif file.flags and file.flags.NoPCH then
+						_p(3,'<PrecompiledHeader '.. if_config_and_platform() .. '>NotUsing</PrecompiledHeader>', premake.esc(cfginfo.name))
 					end
 				end
 				_p(2,'</ClCompile>')
