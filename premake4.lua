@@ -68,8 +68,8 @@
 			links       { "CoreServices.framework" }
 
 		configuration { "macosx", "gmake" }
-			buildoptions { "-mmacosx-version-min=10.4" }
-			linkoptions  { "-mmacosx-version-min=10.4" }
+			buildoptions { "-mmacosx-version-min=10.9" }
+			linkoptions  { "-mmacosx-version-min=10.9" }
 
 		configuration { "solaris" }
 			linkoptions { "-Wl,--export-dynamic" }
