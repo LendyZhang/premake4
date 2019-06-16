@@ -737,7 +737,7 @@
 		_p(3,'buildSettings = {')
 		_p(4,'ALWAYS_SEARCH_USER_PATHS = NO;')
 
-		if not cfg.flags.Symbols then
+		if cfg.flags.Symbols then
 			_p(4,'DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";')
 		end
 		
