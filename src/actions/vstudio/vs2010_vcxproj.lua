@@ -320,7 +320,13 @@
 			debug_info(cfg)
 
 		if cfg.flags.Symbols then
-			_p(3,'<ProgramDataBaseFileName>$(IntDir)%s.pdb</ProgramDataBaseFileName>'
+			local pdbDir;
+			if cfg.kind == "StaticLib" then
+			       pdbDir = '$(OutDir)'
+			else
+			       pdbDir = '$(IntDir)'
+			end
+			_p(3,'<ProgramDataBaseFileName>' .. pdbDir .. '%s.pdb</ProgramDataBaseFileName>'
 				, path.getbasename(cfg.buildtarget.name))
 		end
 
