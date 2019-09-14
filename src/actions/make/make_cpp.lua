@@ -343,12 +343,12 @@
 	function cpp.fileRules(prj)
 		for _, file in ipairs(prj.files or {}) do
 			if path.iscppfile(file) then
-				_p('$(OBJDIR)/%s.o: %s', _MAKE.esc(path.getbasename(file)), _MAKE.esc(file))
+				_p('$(OBJDIR)/%s.o: %s $(GCH)', _MAKE.esc(path.getbasename(file)), _MAKE.esc(file))
 				_p('\t@echo $(notdir $<)')
 				cpp.buildcommand(path.iscfile(file), "o")
 				_p('')
 			elseif (path.getextension(file) == ".rc") then
-				_p('$(OBJDIR)/%s.res: %s', _MAKE.esc(path.getbasename(file)), _MAKE.esc(file))
+				_p('$(OBJDIR)/%s.res: %s $(GCH)', _MAKE.esc(path.getbasename(file)), _MAKE.esc(file))
 				_p('\t@echo $(notdir $<)')
 				_p('\t$(SILENT) $(RESCOMP) $< -O coff -o "$@" $(ALL_RESFLAGS)')
 				_p('')
