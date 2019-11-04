@@ -218,10 +218,13 @@
 	end
 
 	local function sse(cfg)
-		if cfg.flags.EnableSSE then
-			_p(3,'<EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>')
-		elseif cfg.flags.EnableSSE2 then
-			_p(3,'<EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>')
+		-- SSE2 is always enabled in x64.
+		if cfg.platform ~= "x64" then
+			if cfg.flags.EnableSSE then
+				_p(3,'<EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>')
+			elseif cfg.flags.EnableSSE2 then
+				_p(3,'<EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>')
+			end
 		end
 	end
 
@@ -257,10 +260,13 @@
 	end
 
 	local function minimal_build(cfg)
-		if premake.config.isdebugbuild(cfg) and not cfg.flags.NoMinimalRebuild then
-			_p(3,'<MinimalRebuild>true</MinimalRebuild>')
-		else
-			_p(3,'<MinimalRebuild>false</MinimalRebuild>')
+		-- Minimal rebuild is deprecated since VS2017.
+		if tonumber(premake.action.current().vstudio.toolsVersion) < 15.0 then
+			if premake.config.isdebugbuild(cfg) and not cfg.flags.NoMinimalRebuild then
+				_p(3,'<MinimalRebuild>true</MinimalRebuild>')
+			else
+				_p(3,'<MinimalRebuild>false</MinimalRebuild>')
+			end
 		end
 	end
 
@@ -333,6 +339,8 @@
 		if cfg.flags.NoFramePointer then
 			_p(3,'<OmitFramePointers>true</OmitFramePointers>')
 		end
+
+			_p(3,'<MultiProcessorCompilation>true</MultiProcessorCompilation>')
 
 			compile_language(cfg)
 
