@@ -751,10 +751,10 @@
 			_p(4,'EXECUTABLE_EXTENSION = %s;', ext)
 		end
 
-		local outdir = path.getdirectory(cfg.buildtarget.bundlepath)
-		if outdir ~= "." then
-			_p(4,'CONFIGURATION_BUILD_DIR = %s;', outdir)
-		end
+		-- local outdir = path.getdirectory(cfg.buildtarget.bundlepath)
+		-- if outdir ~= "." then
+		-- 	_p(4,'CONFIGURATION_BUILD_DIR = %s;', outdir)
+		-- end
 
 		local frameworkpaths = { "$(inherited)" }
 
@@ -793,6 +793,7 @@
 			_p(4,'LD_RUNPATH_SEARCH_PATHS = "@loader_path";')
 		end
 
+		_p(4,'SKIP_INSTALL = %s;', iif(cfg.kind == 'StaticLib', 'YES', 'NO'))
 		_p(4,'PRODUCT_NAME = "%s";', cfg.buildtarget.basename)
 		_p(3,'};')
 		_p(3,'name = "%s";', cfgname)
@@ -819,6 +820,8 @@
 			_p(4,'ARCHS = "%s";', archs[cfg.platform])
 		end
 
+		_p(4,'ONLY_ACTIVE_ARCH = %s;',iif(premake.config.isdebugbuild(cfg),'YES','NO'))
+
 		if cfg.cxxdialect then
 			_p(4,'CLANG_CXX_LANGUAGE_STANDARD = "%s";', cfg.cxxdialect)
 		end
@@ -829,13 +832,6 @@
 			_p(4,'CLANG_X86_VECTOR_INSTRUCTIONS = sse4.2;')
 		end
 
-		local targetdir = path.getdirectory(cfg.buildtarget.bundlepath)
-		if targetdir ~= "." then
-			_p(4,'CONFIGURATION_BUILD_DIR = "$(SYMROOT)";');
-		end
-		
-		_p(4,'CONFIGURATION_TEMP_DIR = "$(OBJROOT)";')
-		
 		if cfg.flags.Symbols then
 			_p(4,'COPY_PHASE_STRIP = NO;')
 		end
@@ -917,10 +913,15 @@
 			end
 		end
 
-		_p(4,'OBJROOT = "%s";', cfg.objectsdir)
+		local targetdir = path.getdirectory(cfg.buildtarget.bundlepath)
+		if targetdir ~= "." then
+			_p(4,'SYMROOT = "%s";', targetdir)
+			-- _p(4,'CONFIGURATION_BUILD_DIR = "$(SYMROOT)";');
+		end
 
-		_p(4,'ONLY_ACTIVE_ARCH = %s;',iif(premake.config.isdebugbuild(cfg),'YES','NO'))
-		
+		_p(4,'OBJROOT = "%s";', cfg.objectsdir)
+		-- _p(4,'CONFIGURATION_TEMP_DIR = "$(OBJROOT)";')
+
 		-- build list of "other" C/C++ flags
 		local checks = {
 			["-ffast-math"]          = cfg.flags.FloatFast,
@@ -956,10 +957,6 @@
 			_p(4,'SDKROOT = iphoneos;')
 		end
 
-		if targetdir ~= "." then
-			_p(4,'SYMROOT = "%s";', targetdir)
-		end
-		
 		if cfg.flags.ExtraWarnings then
 			_p(4,'WARNING_CFLAGS = (')
 			_p(5,'"-Wall",')
