@@ -1,6 +1,5 @@
-syntax: glob
-
 .DS_Store
+.vs
 
 *.orig
 *~
@@ -26,6 +25,8 @@ Makefile
 *.workspace
 *.project
 *.tags
+*.exvim
+.exvim.*
 
 *.bbprojectsettings
 Scratchpad.txt
