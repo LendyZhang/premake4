@@ -30,7 +30,6 @@
 		"tools/msc.lua",
 		"tools/ow.lua",
 		"tools/snc.lua",
-		"tools/qt.lua",
 		"base/validate.lua",
 		"base/help.lua",
 		"base/premake.lua",

@@ -7,7 +7,6 @@
 	premake.vstudio.vc2010 = { }
 	local vc2010 = premake.vstudio.vc2010
 	local vstudio = premake.vstudio
-	local qt = premake.qt
 
 
 	local function vs2010_config(prj)
@@ -499,54 +498,17 @@
 			sortedfiles = {
 				ClCompile = {},
 				ClInclude = {},
-				None	  = {},
+				None = {},
 				ResourceCompile = {},
-
-				UI		= {},
-				QRC		= {},
-				TS		= {},
-				QObject	= {},
-
-				GeneratedCpp = {},
 			}
-
-			local hasUI  = false
-			local gendir = qt.getgenerateddir(prj)
 
 			for file in premake.project.eachfile(prj) do
 				if path.iscppfile(file.name) then
 					table.insert(sortedfiles.ClCompile, file)
 				elseif path.iscppheader(file.name) then
-					-- qobject file	
-					if qt.isqobjectfile(prj, file.name) then
-						table.insert(sortedfiles.QObject, file)
-
-						--add generated file
-						local genfile = qt.getgeneratedfilename(gendir, file.name, "moc");
-						table.insert(sortedfiles.GeneratedCpp, genfile)
-					else
-						-- add to command include files
-						table.insert(sortedfiles.ClInclude, file)
-					end
+					table.insert(sortedfiles.ClInclude, file)
 				elseif path.isresourcefile(file.name) then
 					table.insert(sortedfiles.ResourceCompile, file)
-				elseif qt.isuifile(file.name) then
-					table.insert(sortedfiles.UI, file)
-
-					-- add generated ui_*.h to ClInclude group
-					local genfile = qt.getgeneratedfilename(gendir, file.name, "ui");
-					table.insert(sortedfiles.ClInclude, genfile)
-
-					hasUI = true
-				elseif qt.isqrcfile(file.name) then
-					table.insert(sortedfiles.QRC, file)
-
-					--add generated file
-					local genfile = qt.getgeneratedfilename(gendir, file.name, "qrc");
-					table.insert(sortedfiles.GeneratedCpp, genfile)
-
-				elseif qt.istsfile(file.name) then
-					table.insert(sortedfilesTS, file)
 				else
 					table.insert(sortedfiles.None, file)
 				end
@@ -554,12 +516,6 @@
 
 			-- Cache the sorted files; they are used several places
 			prj.vc2010sortedfiles = sortedfiles
-
-			-- Addtitional operations
-			if hasUI then
-				-- add ui include path
-				table.insert( prj.includedirs, gendir )
-			end
 		end
 
 		return sortedfiles[group]
@@ -571,20 +527,10 @@
 --
 
 	function vc2010.files(prj)
-		--vc2010 files group
 		vc2010.simplefilesgroup(prj, "ClInclude")
 		vc2010.compilerfilesgroup(prj)
 		vc2010.simplefilesgroup(prj, "None")
 		vc2010.simplefilesgroup(prj, "ResourceCompile")
-
-		-- qt custom file group
-		vc2010.customfilesgroup(prj, "UI")
-		vc2010.customfilesgroup(prj, "QRC")
-		vc2010.customfilesgroup(prj, "QObject")
-
-		-- qt generated files group
-		vc2010.generatedfilesgroup(prj)
-
 	end
 
 
@@ -629,75 +575,7 @@
 			_p(1,'</ItemGroup>')
 		end
 	end
----------------------------------------------------------------------------------------------------------------
---
--- for qt extension
---
-	function vc2010.customfilesgroup(prj, section)
 
-		local configs = prj.solution.vstudio_configs
-		local files = vc2010.getfilegroup(prj, section)
-
-		if #files > 0  then
-			print("Begin qt custom build ...")
-
-			local config_mappings = {}
-			for _, cfginfo in ipairs(configs) do
-				local cfg = premake.getconfig(prj, cfginfo.src_buildcfg, cfginfo.src_platform)
-				if cfg.pchheader and cfg.pchsource and not cfg.flags.NoPCH then
-					config_mappings[cfginfo] = path.translate(cfg.pchsource, "\\")
-				end
-			end
-
-			-- write to xml
-			_p(1,'<ItemGroup>')
-			for _, file in ipairs(files) do
-
-				local translatedpath = path.translate(file.name, "\\")
-				_p(2,'<CustomBuild Include=\"%s\">', translatedpath)
-				for _, cfginfo in ipairs(configs) do
-
-					local cfg = premake.getconfig(prj, cfginfo.src_buildcfg, cfginfo.src_platform)
-					local fc = qt.addcustombuildrule(cfg, file, section)
-					if fc ~= nil then
-
-					--if config_mappings[cfginfo] and translatedpath == config_mappings[cfginfo] then
-						_p(3,'<AdditionalInputs '.. if_config_and_platform()..'>'..fc.addtionalinputs..'</AdditionalInputs>', premake.esc(cfginfo.name))
-						--config_mappings[cfginfo] = nil  --only one source file per pch
-						_p(3,'<Message '..if_config_and_platform()..'>'..fc.message..'</Message>', premake.esc(cfginfo.name))
-						_p(3,'<Outputs '..if_config_and_platform()..'>'..fc.outputs..'</Outputs>', premake.esc(cfginfo.name))
-						_p(3,'<Command '..if_config_and_platform()..'>'..fc.command..'</Command>', premake.esc(cfginfo.name))
-					--end
-					end
-				end
-				_p(2,'</CustomBuild>')
-			end
-			_p(1,'</ItemGroup>')
-		end
-	end
-
-	function vc2010.generatedfilesgroup( prj )
-		local configs = prj.solution.vstudio_configs
-		local files = vc2010.getfilegroup(prj, "GeneratedCpp")
-		if #files > 0  then
-			_p(1,'<ItemGroup>')
-			for _, file in ipairs(files) do
-				local translatedpath = path.translate(file.name, "\\")
-				_p(2,'<ClCompile Include=\"%s\">', translatedpath)
-
-				-- qrc generated file need no precompiled header
-				if string.find(file.name, "qrc_") then
-					for _, cfginfo in ipairs(configs) do
-						_p(3,'<PrecompiledHeader '.. if_config_and_platform() .. '></PrecompiledHeader>', premake.esc(cfginfo.name))
-					end
-				end
-				_p(2,'</ClCompile>')
-			end
-			_p(1,'</ItemGroup>')
-		end
-	end
-
----------------------------------------------------------------------------------------------------------------
 
 --
 -- Output the VC2010 project file header
