@@ -916,11 +916,11 @@
 		local targetdir = path.getdirectory(cfg.buildtarget.bundlepath)
 		if targetdir ~= "." then
 			_p(4,'SYMROOT = "%s";', targetdir)
-			-- _p(4,'CONFIGURATION_BUILD_DIR = "$(SYMROOT)";');
+			_p(4,'CONFIGURATION_BUILD_DIR = "%s";', targetdir)
 		end
 
 		_p(4,'OBJROOT = "%s";', cfg.objectsdir)
-		-- _p(4,'CONFIGURATION_TEMP_DIR = "$(OBJROOT)";')
+		_p(4,'CONFIGURATION_TEMP_DIR = "%s";', cfg.objectsdir)
 
 		-- build list of "other" C/C++ flags
 		local checks = {
