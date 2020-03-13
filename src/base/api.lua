@@ -134,6 +134,12 @@
 			}
 		},
 
+		disablewarnings =
+		{
+			kind = "list",
+			scope = "config",
+		},
+
 		excludes =
 		{
 			kind  = "filelist",

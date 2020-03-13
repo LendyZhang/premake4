@@ -313,6 +313,11 @@
 			_p(3,'<WarningLevel>Level3</WarningLevel>')
 		end
 
+		if #cfg.disablewarnings > 0 then
+			_p(3,'<DisableSpecificWarnings>%s;%%(DisableSpecificWarnings)</DisableSpecificWarnings>',
+					table.concat(premake.esc(cfg.disablewarnings), ";"))
+		end
+
 		if cfg.flags.FatalWarnings then
 			_p(3,'<TreatWarningAsError>true</TreatWarningAsError>')
 		end
