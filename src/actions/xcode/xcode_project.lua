@@ -135,6 +135,47 @@
 		return tr
 	end
 
+	-- 
+	-- for resfolders
+	-- 
+	local function isexistinresfilenode( resFolderNodes, newNode )
+		local ret = false
+		for _, node in ipairs(resFolderNodes) do
+			if (node.path == newNode.path) then
+				ret = true
+				break
+			end
+		end
+		return ret;
+	end
+
+	local function createresfoldernode( tr, cfg )
+		--print ("createresfoldernode")
+		local resFolderNodes = {}
+		for _, value in pairs(cfg.resfolders) do
+	    	local node = {}
+	    	node.name = node.value;
+	    	local index = string.find(value, "/[^/]*$")
+	    	if index then
+	    		node.name = string.sub(value, index + 1, -1);
+	    	end
+	    	node.path = value
+	    	node.id = xcode.newid(node)
+	    	node.buildid = xcode.newid(node, "build")
+	    	if not isexistinresfilenode(resFolderNodes, node) then
+	    		table.insert(resFolderNodes, node)
+	    		print("res folder:" .. value);
+	    	end
+		end
+		tr.resFolderNodes = resFolderNodes
+	end
+
+	local function prepareresfolders(prj, tr)
+		for _, cfg in ipairs(tr.configs) do
+			createresfoldernode(tr, cfg)
+			break
+		end
+	end
 
 --
 -- Generate an Xcode .xcodeproj for a Premake project.
@@ -145,6 +186,7 @@
 
 	function premake.xcode.project(prj)
 		local tr = xcode.buildprjtree(prj)
+		prepareresfolders(prj, tr)
 		xcode.Header(tr)
 		xcode.PBXBuildFile(tr)
 		xcode.PBXContainerItemProxy(tr)

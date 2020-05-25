@@ -199,7 +199,8 @@
 					Symbols = 1,
 					Unicode = 1,
 					Unsafe = 1,
-					WinMain = 1
+					WinMain = 1,
+                    SkipInstall = 0
 				}
 
 				local englishToAmericanSpelling =
@@ -479,6 +480,11 @@
 			scope = "container",
 		},
 
+		resfolders =
+		{
+			kind = "list",
+			scope = "container",
+		},
 	}
 
 
