@@ -398,7 +398,7 @@
 		for _, node in ipairs( tr.resFolderNodes ) do
 			if node.buildid then
 				_p(2,'%s /* %s */ = {isa = PBXFileReference; lastKnownFileType = %s; name = "%s"; path = "%s"; sourceTree = "%s"; };',
-						node.id, node.name, "floder", node.name, node.path, "<group>")
+						node.id, node.name, "folder", node.name, node.path, "<group>")
 			end
 		end
 
