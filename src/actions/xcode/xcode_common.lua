@@ -287,6 +287,15 @@
 				end
 			end
 		})
+
+		--resFolderNodes
+		for _, node in ipairs( tr.resFolderNodes ) do
+			if node.buildid then
+				_p(2,'%s /* %s in %s */ = {isa = PBXBuildFile; fileRef = %s /* %s */; };', 
+					node.buildid, node.name, "Resources", node.id, node.name)
+			end
+		end
+
 		_p('/* End PBXBuildFile section */')
 		_p('')
 	end
@@ -385,6 +394,14 @@
 			end
 		})
 
+		--resFolderNodes
+		for _, node in ipairs( tr.resFolderNodes ) do
+			if node.buildid then
+				_p(2,'%s /* %s */ = {isa = PBXFileReference; lastKnownFileType = %s; name = "%s"; path = "%s"; sourceTree = "%s"; };',
+						node.id, node.name, "floder", node.name, node.path, "<group>")
+			end
+		end
+
 		_p('/* End PBXFileReference section */')
 		_p('')
 	end
@@ -440,6 +457,16 @@
 				
 				_p(3,'isa = PBXGroup;')
 				_p(3,'children = (')
+
+				--resFolderNodes
+				if (node.id == tr.id) then
+					for _, resNode in ipairs( tr.resFolderNodes ) do
+						if resNode.buildid then
+							_p(4,'%s /* %s */,', resNode.id, resNode.name)
+						end
+					end
+				end
+				
 				for _, childnode in ipairs(node.children) do
 					_p(4,'%s /* %s */,', childnode.id, childnode.name)
 				end
@@ -605,6 +632,14 @@
 					end
 				end
 			})
+
+			--resFolderNodes
+			for _, node in ipairs( tr.resFolderNodes ) do
+				if node.buildid then
+					_p(4,'%s /* %s in Resources */,', node.buildid, node.name)
+				end
+			end
+
 			_p(3,');')
 			_p(3,'runOnlyForDeploymentPostprocessing = 0;')
 			_p(2,'};')
@@ -956,6 +991,10 @@
 		if isTargetingiOS then
 			_p(4,'SDKROOT = iphoneos;')
 		end
+
+        if cfg.flags.SkipInstall then
+            _p(4,'SKIP_INSTALL = YES;')
+        end
 
 		if cfg.flags.ExtraWarnings then
 			_p(4,'WARNING_CFLAGS = (')
