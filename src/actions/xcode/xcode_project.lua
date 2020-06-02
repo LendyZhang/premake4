@@ -135,13 +135,15 @@
 		return tr
 	end
 
-	-- 
-	-- for resfolders
-	-- 
-	local function isexistinresfilenode( resFolderNodes, newNode )
+-- 
+-- for res_folder_ref
+-- Cretate resFolderNodes from configure for later use.
+-- 
+
+	local function existinresfoldernodes( resfoldernodes, newnode )
 		local ret = false
-		for _, node in ipairs(resFolderNodes) do
-			if (node.path == newNode.path) then
+		for _, node in ipairs(resfoldernodes) do
+			if (node.path == newnode.path) then
 				ret = true
 				break
 			end
@@ -149,30 +151,28 @@
 		return ret;
 	end
 
-	local function createresfoldernode( tr, cfg )
-		--print ("createresfoldernode")
+	local function createresfoldernodes( tr, cfg )
 		local resFolderNodes = {}
 		for _, value in pairs(cfg.resfolders) do
-	    	local node = {}
-	    	node.name = node.value;
-	    	local index = string.find(value, "/[^/]*$")
-	    	if index then
-	    		node.name = string.sub(value, index + 1, -1);
-	    	end
-	    	node.path = value
-	    	node.id = xcode.newid(node)
-	    	node.buildid = xcode.newid(node, "build")
-	    	if not isexistinresfilenode(resFolderNodes, node) then
-	    		table.insert(resFolderNodes, node)
-	    		print("res folder:" .. value);
-	    	end
+			local node = {}
+			node.name = node.value;
+			local index = string.find(value, "/[^/]*$")
+			if index then
+				node.name = string.sub(value, index + 1, -1);
+			end
+			node.path = value
+			node.id = xcode.newid(node)
+			node.buildid = xcode.newid(node, "build")
+			if not existinresfoldernodes(resFolderNodes, node) then
+				table.insert(resFolderNodes, node)
+			end
 		end
 		tr.resFolderNodes = resFolderNodes
 	end
 
-	local function prepareresfolders(prj, tr)
+	function xcode.PrepareResFolderNodes(tr)
 		for _, cfg in ipairs(tr.configs) do
-			createresfoldernode(tr, cfg)
+			createresfoldernodes(tr, cfg)
 			break
 		end
 	end
@@ -186,7 +186,7 @@
 
 	function premake.xcode.project(prj)
 		local tr = xcode.buildprjtree(prj)
-		prepareresfolders(prj, tr)
+		xcode.PrepareResFolderNodes(tr)
 		xcode.Header(tr)
 		xcode.PBXBuildFile(tr)
 		xcode.PBXContainerItemProxy(tr)
